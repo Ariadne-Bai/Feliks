@@ -57,10 +57,12 @@ fn main() {
     println!("Hello, world!");
     
     let mut sch = Scheduler::new();
+    
     let item_1 = Item {
         time: 5,
         event_type: EventType::TrainArrival,
     };
+
     let item_2 = Item {
         time: 10,
         event_type: EventType::TrainDeparture,
