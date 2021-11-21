@@ -57,7 +57,7 @@ fn main() {
     println!("Hello, world!");
     
     let mut sch = Scheduler::new();
-    
+
     let item_1 = Item {
         time: 5,
         event_type: EventType::TrainArrival,
@@ -70,7 +70,8 @@ fn main() {
 
     sch.items.push(item_1);
     sch.items.push(item_2);
-
+    
+    // test for queue operation
     loop {
         if sch.items.is_empty() {
             break;
