@@ -1,8 +1,5 @@
-
-
-type TrainID = u32;
-type StationID = u32;
-
+use crate::{customTypes::*};
+use std::collections::HashMap;
 // a trait/struct for train, holds state of the train
 pub struct Train {
     // train id should be the same as the index of this train in TimeTable.start_times
@@ -30,15 +27,20 @@ enum TrainState {
 // could be just simplified to a number for now
 // in initialization, schedule events train arrival at first station for all trains starting on this day
 struct TimeTable {
-    line_name: String,
-    stations: Vec<Station>,
-    start_times: Vec<u32>,
+    id: LineID,
+    name: String,
+    stations: Vec<StationID>,
+    // time for new train to start from the beginning station in the day
+    // for the final station, the start time means when 
+    // the train leaves operation and all passengers should have get off the train
+    start_times: HashMap<StationID, Time>,
+    // distance from a station to next; the last station does not have this number apparently
+    // so it's either some distance or none :)
+    distance_next: HashMap<StationID, Option<Distance>>,
 }
 
+// could have some property like 'capacity'
 struct Station {
     id: StationID,
     name: String,
-    has_next: bool,
-    distance_to_next: u32,
-    stop_time: u32,
 }

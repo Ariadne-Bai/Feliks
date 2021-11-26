@@ -4,7 +4,7 @@ use std::collections::{BinaryHeap, HashMap};
 
 // a enum for event(start_at_station, stop_at_station)
 #[derive(PartialEq, Eq, Hash, PartialOrd, Ord, Clone)]
-enum EventType {
+enum Event {
     // depart from a stationID
     TrainDeparture(u32),
     // arrive at a stationID
@@ -29,7 +29,7 @@ impl Scheduler {
 #[derive(PartialEq, Eq, Clone)]
 struct Item {
     time: u32,
-    event_type: EventType,
+    event_type: Event,
 }
 
 // what's the relationship between an PartialOrd and an Ord??

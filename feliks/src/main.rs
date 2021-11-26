@@ -1,5 +1,6 @@
 pub mod schedule;
 pub mod train;
+pub mod customTypes;
 use schedule::Scheduler;
 
 
