@@ -1,8 +1,8 @@
 pub mod custom_types;
 pub mod schedule;
+pub mod sim_engine;
 pub mod train;
 pub mod train_manager;
-pub mod sim_engine;
 use crate::custom_types::*;
 use schedule::Scheduler;
 

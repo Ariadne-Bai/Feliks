@@ -32,8 +32,17 @@ impl Scheduler {
     // for a certain time point, if there are Event at this time point to happen
     // return Some<Event>. The Sim engine will push new event accordingly,
     // and call methods to update agent state
-    pub fn consume(&mut self, time: Time) -> Option<Event> {
-        unimplemented!()
+    pub fn consume(&mut self, cur_time: Time) -> Option<Event> {
+        match self.items.pop() {
+            None => None,
+            Some(item) => {
+                if item.time <= cur_time {
+                    Some(item.event)
+                } else {
+                    None
+                }
+            }
+        }
     }
 
     // temporary printing for test purpose
