@@ -1,10 +1,10 @@
-use crate::train::*;
+use crate::{train::*, customTypes::*};
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
 
 // a enum for event(start_at_station, stop_at_station)
 #[derive(PartialEq, Eq, Hash, PartialOrd, Ord, Clone)]
-enum Event {
+pub enum Event {
     // depart from a stationID
     TrainDeparture(u32),
     // arrive at a stationID
@@ -23,13 +23,17 @@ impl Scheduler {
             items: BinaryHeap::new(),
         }
     }
+
+    pub fn push(&mut self, time: Time, event: Event) {
+        self.items.push(Item { time, event });
+    }
 }
 
-// struct for a single event, to be pushed into the scheduler priority queue
+// struct for a single item, to be pushed into the scheduler priority queue
 #[derive(PartialEq, Eq, Clone)]
 struct Item {
     time: u32,
-    event_type: Event,
+    event: Event,
 }
 
 // what's the relationship between an PartialOrd and an Ord??

@@ -1,5 +1,5 @@
 use crate::{customTypes::*};
-use std::collections::HashMap;
+use std::{collections::HashMap, hash::Hash};
 // a trait/struct for train, holds state of the train
 pub struct Train {
     // train id should be the same as the index of this train in TimeTable.start_times
@@ -21,12 +21,19 @@ enum TrainState {
     RunOnTrail(StationID),
 }
 
+
+// could have some property like 'capacity'
+struct Station {
+    id: StationID,
+    name: String,
+}
+
 // a trait/struct for metro timetable (start with a single line)
 // start with a list for stations first;
 // should include a list of train start time during a day, like 6am, 8am....
 // could be just simplified to a number for now
 // in initialization, schedule events train arrival at first station for all trains starting on this day
-struct TimeTable {
+struct LineTimeTable {
     id: LineID,
     name: String,
     stations: Vec<StationID>,
@@ -39,8 +46,26 @@ struct TimeTable {
     distance_next: HashMap<StationID, Option<Distance>>,
 }
 
-// could have some property like 'capacity'
-struct Station {
+struct StationTimeTable {
     id: StationID,
-    name: String,
+    start_time: Time,
+    distance_next: Option<Distance>,
+}
+
+impl LineTimeTable {
+    pub fn new(id: LineID, name: String) -> Self {
+        LineTimeTable {
+            id: id,
+            name: name,
+            stations: Vec::new(),
+            start_times: HashMap::new(),
+            distance_next: HashMap::new(),
+        }
+    }
+
+    pub fn add_tation(&mut self, stt: StationTimeTable) {
+        self.stations.push(stt.id);
+        self.start_times.insert(stt.id, stt.start_time);
+        self.distance_next.insert(stt.id, stt.distance_next);
+    }
 }
