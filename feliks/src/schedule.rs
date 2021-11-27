@@ -1,15 +1,15 @@
-use crate::{train::*, custom_types::*};
+use crate::{custom_types::*, train::*};
+use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
-use serde::{Deserialize, Serialize};
 
 // a enum for event(start_at_station, stop_at_station)
 #[derive(Serialize, Deserialize, PartialEq, Eq, Hash, PartialOrd, Ord, Clone, Debug)]
 pub enum Event {
     // depart from a stationID
-    TrainDeparture(StationID),
+    TrainDeparture { sid: StationID, tid: StationID },
     // arrive at a stationID
-    TrainArrival(StationID),
+    TrainArrival { sid: StationID, tid: StationID },
 }
 
 // think about the design of data structures here
@@ -28,7 +28,14 @@ impl Scheduler {
     pub fn push(&mut self, time: Time, event: Event) {
         self.items.push(Item { time, event });
     }
-    
+
+    // for a certain time point, if there are Event at this time point to happen
+    // return Some<Event>. The Sim engine will push new event accordingly,
+    // and call methods to update agent state
+    pub fn consume(&mut self, time: Time) -> Option<Event> {
+        unimplemented!()
+    }
+
     // temporary printing for test purpose
     pub fn pretty_print_top(&self) {
         println!("{:?}", self.items.peek().unwrap());

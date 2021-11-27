@@ -1,18 +1,16 @@
 use crate::{custom_types::*, schedule::*};
-use std::{collections::HashMap, hash::Hash};
+use std::collections::HashMap;
 // a trait/struct for train, holds state of the train
 pub struct Train {
     // train id should be the same as the index of this train in TimeTable.start_times
     id: TrainID,
-    // basic assumtion: 
+    // basic assumtion:
     // train run at the same speed as long as it start, no acceleration consitered
     speed: i32,
     state: TrainState,
 }
 
-impl Train {
-
-}
+impl Train {}
 
 enum TrainState {
     // stop at a particular stationID
@@ -21,9 +19,8 @@ enum TrainState {
     RunOnTrail(StationID),
 }
 
-
 // could have some property like 'capacity'
-struct Station {
+pub struct Station {
     id: StationID,
     name: String,
 }
@@ -39,7 +36,7 @@ pub struct LineTimeTable {
     stations: Vec<StationID>,
     new_train_times: Vec<Time>,
     // time for new train to start from the beginning station in the day
-    // for the final station, the start time means when 
+    // for the final station, the start time means when
     // the train leaves operation and all passengers should have get off the train
     stop_times: HashMap<StationID, Time>,
     // distance from a station to next; the last station does not have this number apparently
@@ -62,7 +59,6 @@ impl StationTimeTable {
         }
     }
 }
-
 
 impl LineTimeTable {
     pub fn new(id: LineID, name: String) -> Self {
@@ -88,11 +84,12 @@ impl LineTimeTable {
             self.new_train_times.push(*time);
         }
     }
-    
+
     // schedule events for train starting time;
-    pub fn schedule_starts(&self, scheduler: &mut Scheduler) {
-        for time in &self.new_train_times {
-            scheduler.push(*time, Event::TrainArrival(self.stations[0]));
-        }
-    }
+    // TODO: move this functionality to the simulation engine
+    // pub fn schedule_starts(&self, scheduler: &mut Scheduler) {
+    //     for time in &self.new_train_times {
+    //         scheduler.push(*time, Event::TrainArrival(self.stations[0]));
+    //     }
+    // }
 }
