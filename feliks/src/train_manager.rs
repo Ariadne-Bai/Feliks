@@ -9,7 +9,6 @@ use std::{collections::HashMap, marker::PhantomData};
 
 pub struct TrainManager<'a> {
     lineTables: HashMap<LineID, LineTimeTable>,
-    stationTables: HashMap<StationID, StationTimeTable>,
     stations: HashMap<StationID, Station>,
     trains: HashMap<TrainID, Train>,
     next_line: LineID,
@@ -21,7 +20,6 @@ impl<'a> TrainManager<'a> {
     pub fn new() -> Self {
         TrainManager {
             lineTables: HashMap::new(),
-            stationTables: HashMap::new(),
             stations: HashMap::new(),
             trains: HashMap::new(),
             next_line: 0,
@@ -31,21 +29,18 @@ impl<'a> TrainManager<'a> {
     }
 
     // TODO: train system initializations
-    pub fn registerStation() {
-        unimplemented!();
-    }
 
-    pub fn registerStationTable() {
+    pub fn registerStation() {
         unimplemented!();
     }
 
     pub fn registerLineTable() {
         unimplemented!();
     }
+    
+    // register Train object; SimEngine should be responsible for spawn initial events
+    pub fn registerTrain() {
 
-    // register Train object, schedule initial event for train
-    pub fn spawnTrains() {
-        unimplemented!();
     }
 
     // TODO: build static im-memory graph of the transit network (use petgraph crate!)
@@ -64,20 +59,21 @@ impl<'a> TrainManager<'a> {
     pub fn handle_event(&mut self, event: Event) -> (Time, Option<Event>){
         
         match event {
-            Event::TrainArrival{ sid, tid} => {
+            Event::TrainArrival{ lid, sid, tid} => {
                 
                 // each arrival always map to a departure, event for the last station
-                let changeTime = self.stationTables.get(&sid).unwrap().stop_time;
-                (changeTime, Some(Event::TrainDeparture{sid, tid}))
+                let changeTime = self.lineTables.get(&lid).unwrap().get_stop_time(sid);
+                (changeTime, Some(Event::TrainDeparture{lid, sid, tid}))
             }
-            Event::TrainDeparture{ sid, tid} => {
+            Event::TrainDeparture{ lid, sid, tid} => {
                 self.train_update(event, tid);
                 // return a new event if there is next station, return none if no next station
-                let nextStation = self.stationTables.get(&sid).unwrap().station_next;
+                let nextStation = self.lineTables.get(&lid).unwrap().get_next_station(sid);
                 match nextStation {
                     Some(st) => {
-                        let changeTime = self.stationTables.get(&sid).unwrap().distance_next.unwrap();
-                        (changeTime, Some(Event::TrainArrival{sid: st, tid}))
+                        let dis = self.lineTables.get(&lid).unwrap().get_dis_next(sid).unwrap();
+                        let speed = self.trains.get(&tid).unwrap().speed;
+                        (dis / speed, Some(Event::TrainArrival{lid, sid: st, tid}))
                     }
                     None => {
                         (0, None)

@@ -26,12 +26,13 @@ impl<'a> SimEngine<'a> {
     pub fn do_step(&mut self, cur_time: Time) {
         while let Some(event) = self.scheduler.consume(cur_time) {
             match event {
-                Event::TrainArrival{ sid, tid} => {
+                Event::TrainArrival{ lid, sid, tid} => {
                     let res =self.train_manager.handle_event(event);
                     self.scheduler.push(cur_time + res.0, res.1.unwrap());
                 }
-                Event::TrainDeparture{ sid, tid} => {
+                Event::TrainDeparture{ lid, sid, tid} => {
                     let res = self.train_manager.handle_event(event);
+                    // only schedule new event if there is another station; otherwise do nothing
                     res.1.map(|event| {
                         self.scheduler.push(cur_time + res.0, event);
                     });
@@ -41,3 +42,5 @@ impl<'a> SimEngine<'a> {
         // the loop should break when there is no more event at this time point
     }
 }
+
+

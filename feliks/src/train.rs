@@ -7,29 +7,47 @@ pub struct Train {
     line: LineID,
     // basic assumtion:
     // train run at the same speed as long as it start, no acceleration consitered
-    speed: i32,
+    pub speed: u32,
     state: TrainState,
 }
 
 impl Train {
+    pub fn new(id: TrainID, line: LineID, speed: u32, sid: StationID, time: Time) -> Self {
+        Train { 
+            id, 
+            line, 
+            speed, 
+            state: TrainState::StopInStation{ sid: sid, since: time },
+        }
+    }
+
     pub fn update_state(&mut self, event: Event) {
         unimplemented!();
     }
 }
 
+// my current understanding is that train state is mainly for GUI drawing
 enum TrainState {
     // stop at a particular stationID
-    StopInStation(StationID),
+    StopInStation{sid: StationID, since: Time},
     // running on the trail after some station
-    RunOnTrail(StationID),
+    RunOnTrail{sid: StationID, since: Time},
     // the train has departed the last station, which means it has finished all travel
-    Finished,
+    Finished{since: Time},
 }
 
 // could have some property like 'capacity'
 pub struct Station {
     id: StationID,
     name: String,
+    corx: Distance,
+    cory: Distance,
+}
+
+impl Station {
+    pub fn new(id: StationID, name: String, corx: Distance, cory: Distance) -> Self {
+        Station { id, name, corx, cory }
+    }
 }
 
 // a trait/struct for metro timetable (start with a single line)
@@ -40,22 +58,18 @@ pub struct Station {
 pub struct LineTimeTable {
     id: LineID,
     name: String,
+    speed: u32,
     stations: Vec<StationID>,
     new_train_times: Vec<Time>,
-    // time for new train to start from the beginning station in the day
-    // for the final station, the start time means when
-    // the train leaves operation and all passengers should have get off the train
-    stop_times: HashMap<StationID, Time>,
-    // distance from a station to next; the last station does not have this number apparently
-    // so it's either some distance or none :)
-    distance_next: HashMap<StationID, Option<Distance>>,
+    station_tables: HashMap<StationID, StationTimeTable>,
 }
 
+// this is just a tmp structure for setting up a line time table
 pub struct StationTimeTable {
     id: StationID,
-    pub stop_time: Time,
-    pub distance_next: Option<Distance>,
-    pub station_next: Option<StationID>,
+    stop_time: Time,
+    distance_next: Option<Distance>,
+    station_next: Option<StationID>,
 }
 
 impl StationTimeTable {
@@ -70,21 +84,21 @@ impl StationTimeTable {
 }
 
 impl LineTimeTable {
-    pub fn new(id: LineID, name: String) -> Self {
+    // a line has a defualt train speed
+    pub fn new(id: LineID, name: String, speed: u32) -> Self {
         LineTimeTable {
             id: id,
             name: name,
+            speed: speed,
             stations: Vec::new(),
             new_train_times: Vec::new(),
-            stop_times: HashMap::new(),
-            distance_next: HashMap::new(),
+            station_tables: HashMap::new(),
         }
     }
 
     pub fn add_station(&mut self, stt: StationTimeTable) {
         self.stations.push(stt.id);
-        self.stop_times.insert(stt.id, stt.stop_time);
-        self.distance_next.insert(stt.id, stt.distance_next);
+        self.station_tables.insert(stt.id, stt);
     }
 
     pub fn set_new_trains(&mut self, times: &Vec<Time>) {
@@ -92,6 +106,18 @@ impl LineTimeTable {
             // dereferencing the borrow. not fully understand this yet
             self.new_train_times.push(*time);
         }
+    }
+
+    pub fn get_stop_time(&self, sid: StationID) -> Time {
+        self.station_tables.get(&sid).unwrap().stop_time
+    }
+
+    pub fn get_next_station(&self, sid: StationID) -> Option<StationID> {
+        self.station_tables.get(&sid).unwrap().station_next
+    }
+
+    pub fn get_dis_next(&self, sid: StationID) -> Option<Distance> {
+        self.station_tables.get(&sid).unwrap().distance_next
     }
 
     // schedule events for train starting time;
