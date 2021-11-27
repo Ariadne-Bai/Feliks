@@ -4,6 +4,7 @@ use std::collections::HashMap;
 pub struct Train {
     // train id should be the same as the index of this train in TimeTable.start_times
     id: TrainID,
+    line: LineID,
     // basic assumtion:
     // train run at the same speed as long as it start, no acceleration consitered
     speed: i32,

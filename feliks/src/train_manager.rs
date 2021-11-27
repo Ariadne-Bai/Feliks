@@ -12,6 +12,8 @@ pub struct TrainManager {
     stationTables: HashMap<StationID, StationTimeTable>,
     stations: HashMap<StationID, Station>,
     trains: HashMap<TrainID, Train>,
+    next_line: LineID,
+    next_train: TrainID,
 }
 
 impl TrainManager {
@@ -21,6 +23,8 @@ impl TrainManager {
             stationTables: HashMap::new(),
             stations: HashMap::new(),
             trains: HashMap::new(),
+            next_line: 0,
+            next_train: 0,
         }
     }
 
@@ -41,6 +45,10 @@ impl TrainManager {
     pub fn spawnTrains() {
         unimplemented!();
     }
+
+    // TODO: build static im-memory graph of the transit network (use petgraph crate!)
+    // use a pathfinding algorithm to find the route for passengers
+    // there are also interesting infomation about graph algorithm with that crate
 
     // TODO: look up and update state for some agent
     // agent have their own update() method, but manager will find which object to call
