@@ -1,4 +1,4 @@
-use crate::{customTypes::*};
+use crate::{custom_types::*, schedule::*};
 use std::{collections::HashMap, hash::Hash};
 // a trait/struct for train, holds state of the train
 pub struct Train {
@@ -33,24 +33,36 @@ struct Station {
 // should include a list of train start time during a day, like 6am, 8am....
 // could be just simplified to a number for now
 // in initialization, schedule events train arrival at first station for all trains starting on this day
-struct LineTimeTable {
+pub struct LineTimeTable {
     id: LineID,
     name: String,
     stations: Vec<StationID>,
+    new_train_times: Vec<Time>,
     // time for new train to start from the beginning station in the day
     // for the final station, the start time means when 
     // the train leaves operation and all passengers should have get off the train
-    start_times: HashMap<StationID, Time>,
+    stop_times: HashMap<StationID, Time>,
     // distance from a station to next; the last station does not have this number apparently
     // so it's either some distance or none :)
     distance_next: HashMap<StationID, Option<Distance>>,
 }
 
-struct StationTimeTable {
+pub struct StationTimeTable {
     id: StationID,
-    start_time: Time,
+    stop_time: Time,
     distance_next: Option<Distance>,
 }
+
+impl StationTimeTable {
+    pub fn new(id: StationID, stop_time: Time, distance_next: Option<Distance>) -> Self {
+        StationTimeTable {
+            id,
+            stop_time,
+            distance_next,
+        }
+    }
+}
+
 
 impl LineTimeTable {
     pub fn new(id: LineID, name: String) -> Self {
@@ -58,14 +70,29 @@ impl LineTimeTable {
             id: id,
             name: name,
             stations: Vec::new(),
-            start_times: HashMap::new(),
+            new_train_times: Vec::new(),
+            stop_times: HashMap::new(),
             distance_next: HashMap::new(),
         }
     }
 
-    pub fn add_tation(&mut self, stt: StationTimeTable) {
+    pub fn add_station(&mut self, stt: StationTimeTable) {
         self.stations.push(stt.id);
-        self.start_times.insert(stt.id, stt.start_time);
+        self.stop_times.insert(stt.id, stt.stop_time);
         self.distance_next.insert(stt.id, stt.distance_next);
+    }
+
+    pub fn set_new_trains(&mut self, times: &Vec<Time>) {
+        for time in times {
+            // dereferencing the borrow. not fully understand this yet
+            self.new_train_times.push(*time);
+        }
+    }
+    
+    // schedule events for train starting time;
+    pub fn schedule_starts(&self, scheduler: &mut Scheduler) {
+        for time in &self.new_train_times {
+            scheduler.push(*time, Event::TrainArrival(self.stations[0]));
+        }
     }
 }

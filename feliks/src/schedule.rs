@@ -1,14 +1,15 @@
-use crate::{train::*, customTypes::*};
+use crate::{train::*, custom_types::*};
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
+use serde::{Deserialize, Serialize};
 
 // a enum for event(start_at_station, stop_at_station)
-#[derive(PartialEq, Eq, Hash, PartialOrd, Ord, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Hash, PartialOrd, Ord, Clone, Debug)]
 pub enum Event {
     // depart from a stationID
-    TrainDeparture(u32),
+    TrainDeparture(StationID),
     // arrive at a stationID
-    TrainArrival(u32),
+    TrainArrival(StationID),
 }
 
 // think about the design of data structures here
@@ -27,10 +28,16 @@ impl Scheduler {
     pub fn push(&mut self, time: Time, event: Event) {
         self.items.push(Item { time, event });
     }
+    
+    // temporary printing for test purpose
+    pub fn pretty_print_top(&self) {
+        println!("{:?}", self.items.peek().unwrap());
+    }
 }
 
 // struct for a single item, to be pushed into the scheduler priority queue
-#[derive(PartialEq, Eq, Clone)]
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 struct Item {
     time: u32,
     event: Event,
