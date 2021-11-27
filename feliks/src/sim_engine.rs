@@ -148,9 +148,11 @@ mod test {
             simengine.spawn_train(time, sweetyId, choId, ntid);
         }
         
+
+
         let mut clock = 0;
         loop {
-            if clock >= 200 {
+            if clock >= 300 {
                 break;
             }
             simengine.do_step(clock);
