@@ -1,0 +1,12 @@
+[package]
+name = "feliks-neo"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { version = "1.14.0", features = ["full"] }
+neo4rs = "0.5.8"
+futures = "0.3.18"
+uuid = { version = "0.8", features = ["serde", "v4"] }
