@@ -22,6 +22,8 @@ enum TrainState {
     StopInStation(StationID),
     // running on the trail after some station
     RunOnTrail(StationID),
+    // the train has departed the last station, which means it has finished all travel
+    Finished,
 }
 
 // could have some property like 'capacity'
@@ -51,16 +53,18 @@ pub struct LineTimeTable {
 
 pub struct StationTimeTable {
     id: StationID,
-    stop_time: Time,
-    distance_next: Option<Distance>,
+    pub stop_time: Time,
+    pub distance_next: Option<Distance>,
+    pub station_next: Option<StationID>,
 }
 
 impl StationTimeTable {
-    pub fn new(id: StationID, stop_time: Time, distance_next: Option<Distance>) -> Self {
+    pub fn new(id: StationID, stop_time: Time, dn: Option<Distance>, sn: Option<StationID>) -> Self {
         StationTimeTable {
             id,
             stop_time,
-            distance_next,
+            distance_next: dn,
+            station_next: sn,
         }
     }
 }

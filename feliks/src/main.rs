@@ -11,13 +11,13 @@ use crate::train::{LineTimeTable, StationTimeTable};
 // a trait/struct for train, holds state of the train
 fn main() {
     println!("Hello, world!");
-    let mut sch = Scheduler::new();
+    // let mut sch = Scheduler::new();
 
-    // initialize a line time table and see it the scheduling works
-    let mut line_table = LineTimeTable::new(0, "BLUE".to_string());
+    // // initialize a line time table and see it the scheduling works
+    // let mut line_table = LineTimeTable::new(0, "BLUE".to_string());
 
-    line_table.add_station(StationTimeTable::new(0, 5, Some(10)));
+    // line_table.add_station(StationTimeTable::new(0, 5, Some(10)));
 
-    let times: Vec<Time> = vec![10, 20, 30];
-    line_table.set_new_trains(&times);
+    // let times: Vec<Time> = vec![10, 20, 30];
+    // line_table.set_new_trains(&times);
 }
