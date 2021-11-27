@@ -12,6 +12,7 @@ pub struct TrainManager<'a> {
     stations: HashMap<StationID, Station>,
     trains: HashMap<TrainID, Train>,
     next_line: LineID,
+    next_station: StationID,
     next_train: TrainID,
     phantom: PhantomData<&'a u32>
 }
@@ -23,6 +24,7 @@ impl<'a> TrainManager<'a> {
             stations: HashMap::new(),
             trains: HashMap::new(),
             next_line: 0,
+            next_station: 0, 
             next_train: 0,
             phantom: PhantomData,
         }
@@ -30,17 +32,35 @@ impl<'a> TrainManager<'a> {
 
     // TODO: train system initializations
 
-    pub fn registerStation() {
-        unimplemented!();
+    pub fn registerStation(&mut self, name: String, corx: Distance, cory: Distance) {
+        let st = Station::new(self.next_station, name, corx, cory);
+        self.stations.insert(self.next_station, st);
+        self.next_station += 1;
     }
 
-    pub fn registerLineTable() {
-        unimplemented!();
+    pub fn registerLineTable(&mut self, name: String, speed: u32) {
+        let lt = LineTimeTable::new(self.next_line, name, speed);
+        self.lineTables.insert(self.next_line, lt);
+        self.next_line += 1;
+    }
+
+    pub fn add_station_toline(&mut self, lid: LineID, stt: StationTimeTable) {
+        match self.lineTables.get_mut(&lid) {
+            Some(ltb) => {
+                ltb.add_station(stt);
+            }
+            None => {
+                println!("there is no line with ID {}!", lid);
+            }
+        }
     }
     
     // register Train object; SimEngine should be responsible for spawn initial events
-    pub fn registerTrain() {
-
+    pub fn registerTrain(&mut self, lid: LineID, sid: StationID, time: Time) {
+        let sp = self.lineTables.get(&lid).unwrap().get_speed();
+        let tr = Train::new(self.next_train, lid, sp, sid, time);
+        self.trains.insert(self.next_train, tr);
+        self.next_train += 1;
     }
 
     // TODO: build static im-memory graph of the transit network (use petgraph crate!)

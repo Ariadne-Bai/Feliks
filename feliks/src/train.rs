@@ -36,7 +36,7 @@ enum TrainState {
     Finished{since: Time},
 }
 
-// could have some property like 'capacity'
+// could have some property like 'capacity', and state of 'crowd size'
 pub struct Station {
     id: StationID,
     name: String,
@@ -118,6 +118,10 @@ impl LineTimeTable {
 
     pub fn get_dis_next(&self, sid: StationID) -> Option<Distance> {
         self.station_tables.get(&sid).unwrap().distance_next
+    }
+
+    pub fn get_speed(&self) -> u32 {
+        self.speed
     }
 
     // schedule events for train starting time;
