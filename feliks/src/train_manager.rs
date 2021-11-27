@@ -1,5 +1,5 @@
 use crate::{custom_types::*, train::*};
-use std::collections::HashMap;
+use std::{collections::HashMap, marker::PhantomData};
 
 /**
  * Central registry for trains, stations, lines
@@ -7,16 +7,17 @@ use std::collections::HashMap;
  * Is this a good design? I've got no idea
  */
 
-pub struct TrainManager {
+pub struct TrainManager<'a> {
     lineTables: HashMap<LineID, LineTimeTable>,
     stationTables: HashMap<StationID, StationTimeTable>,
     stations: HashMap<StationID, Station>,
     trains: HashMap<TrainID, Train>,
     next_line: LineID,
     next_train: TrainID,
+    phantom: PhantomData<&'a u32>
 }
 
-impl TrainManager {
+impl<'a> TrainManager<'a> {
     pub fn new() -> Self {
         TrainManager {
             lineTables: HashMap::new(),
@@ -25,6 +26,7 @@ impl TrainManager {
             trains: HashMap::new(),
             next_line: 0,
             next_train: 0,
+            phantom: PhantomData,
         }
     }
 
@@ -52,4 +54,8 @@ impl TrainManager {
 
     // TODO: look up and update state for some agent
     // agent have their own update() method, but manager will find which object to call
+    
+    pub fn trainLookUp(tid: TrainID) -> &'a mut Train {
+        unimplemented!();
+    }
 }

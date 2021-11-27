@@ -1,3 +1,5 @@
+use std::io::BufRead;
+
 use crate::{custom_types::*, schedule::*, train_manager::*};
 
 /**
@@ -19,7 +21,17 @@ impl<'a> SimEngine<'a> {
         }
     }
 
-    pub fn do_step(cur_time: Time) {
-        
+    pub fn do_step(&mut self, cur_time: Time) {
+        while let Some(event) = self.scheduler.consume(cur_time) {
+            match event {
+                Event::TrainArrival{ sid, tid} => {
+                    
+                }
+                Event::TrainDeparture{ sid, tid} => {
+
+                }
+            }
+        }
+        // the loop should break when there is no more event at this time point
     }
 }
