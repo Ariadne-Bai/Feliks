@@ -20,9 +20,10 @@ impl Train {
             state: TrainState::StopInStation{ sid: sid, since: time },
         }
     }
-
+    
+    // TODO : this has not been implemented!!!!!!
     pub fn update_state(&mut self, event: Event) {
-        unimplemented!();
+        
     }
 }
 
@@ -101,11 +102,8 @@ impl LineTimeTable {
         self.station_tables.insert(stt.id, stt);
     }
 
-    pub fn set_new_trains(&mut self, times: &Vec<Time>) {
-        for time in times {
-            // dereferencing the borrow. not fully understand this yet
-            self.new_train_times.push(*time);
-        }
+    pub fn add_new_traintime(&mut self, time: Time) {
+        self.new_train_times.push(time);
     }
 
     pub fn get_stop_time(&self, sid: StationID) -> Time {
@@ -122,6 +120,14 @@ impl LineTimeTable {
 
     pub fn get_speed(&self) -> u32 {
         self.speed
+    }
+
+    pub fn get_new_times(&self) -> &Vec<Time> {
+        &self.new_train_times
+    }
+
+    pub fn get_first_station(&self) -> StationID {
+        *self.stations.get(0).unwrap()
     }
 
     // schedule events for train starting time;

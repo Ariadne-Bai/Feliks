@@ -32,16 +32,29 @@ impl<'a> TrainManager<'a> {
 
     // TODO: train system initializations
 
-    pub fn registerStation(&mut self, name: String, corx: Distance, cory: Distance) {
+    pub fn register_station(&mut self, name: String, corx: Distance, cory: Distance) -> StationID {
         let st = Station::new(self.next_station, name, corx, cory);
         self.stations.insert(self.next_station, st);
         self.next_station += 1;
+        self.next_station - 1
     }
 
-    pub fn registerLineTable(&mut self, name: String, speed: u32) {
+    pub fn register_linetable(&mut self, name: String, speed: u32) -> LineID {
         let lt = LineTimeTable::new(self.next_line, name, speed);
         self.lineTables.insert(self.next_line, lt);
         self.next_line += 1;
+        self.next_line - 1
+    }
+
+    pub fn add_new_traintime_toline(&mut self, lid: LineID, time: Time) {
+        match self.lineTables.get_mut(&lid) {
+            Some(ltb) => {
+                ltb.add_new_traintime(time);
+            }
+            None => {
+                println!("Add New Train Times: there is no line with ID {}!", lid);
+            }
+        }
     }
 
     pub fn add_station_toline(&mut self, lid: LineID, stt: StationTimeTable) {
@@ -50,17 +63,18 @@ impl<'a> TrainManager<'a> {
                 ltb.add_station(stt);
             }
             None => {
-                println!("there is no line with ID {}!", lid);
+                println!("Add Station: there is no line with ID {}!", lid);
             }
         }
     }
     
     // register Train object; SimEngine should be responsible for spawn initial events
-    pub fn registerTrain(&mut self, lid: LineID, sid: StationID, time: Time) {
+    pub fn register_train(&mut self, lid: LineID, sid: StationID, time: Time) -> TrainID {
         let sp = self.lineTables.get(&lid).unwrap().get_speed();
         let tr = Train::new(self.next_train, lid, sp, sid, time);
         self.trains.insert(self.next_train, tr);
         self.next_train += 1;
+        self.next_train - 1
     }
 
     // TODO: build static im-memory graph of the transit network (use petgraph crate!)
@@ -75,6 +89,16 @@ impl<'a> TrainManager<'a> {
             the_train.update_state(event);
         }
     }
+    
+    // This does not work! always double borrow...
+    // pub fn initialize_trains(&mut self) {
+    //     for (lid, ltb) in &mut self.lineTables {
+    //         let fsid = ltb.get_first_station();
+    //         for stime in ltb.get_new_times() {
+    //             self.register_train(*lid, fsid, *stime);
+    //         }
+    //     }
+    // }
 
     pub fn handle_event(&mut self, event: Event) -> (Time, Option<Event>){
         

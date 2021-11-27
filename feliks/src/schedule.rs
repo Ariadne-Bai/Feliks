@@ -41,6 +41,7 @@ impl Scheduler {
                     println!("successfully consumed a event {:?} at cur_time {}", item.event, cur_time);
                     Some(item.event)
                 } else {
+                    self.items.push(item);
                     None
                 }
             }
