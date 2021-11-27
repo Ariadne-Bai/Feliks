@@ -1,4 +1,4 @@
-use crate::{custom_types::*, train::*};
+use crate::{custom_types::*, schedule::*, train::*};
 use std::{collections::HashMap, marker::PhantomData};
 
 /**
@@ -55,7 +55,9 @@ impl<'a> TrainManager<'a> {
     // TODO: look up and update state for some agent
     // agent have their own update() method, but manager will find which object to call
     
-    pub fn trainLookUp(tid: TrainID) -> &'a mut Train {
-        unimplemented!();
+    pub fn train_update(&mut self, event: Event, tid: TrainID) {
+        if let Some(the_train) = self.trains.get_mut(&tid) {
+            the_train.update_state(event);
+        }
     }
 }

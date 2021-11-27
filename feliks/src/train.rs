@@ -11,7 +11,11 @@ pub struct Train {
     state: TrainState,
 }
 
-impl Train {}
+impl Train {
+    pub fn update_state(&mut self, event: Event) {
+        unimplemented!();
+    }
+}
 
 enum TrainState {
     // stop at a particular stationID
