@@ -1,4 +1,5 @@
 use crate::custom_types::*;
+use crate::train::Train;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
@@ -18,6 +19,27 @@ pub enum Event {
         sid: StationID,
         tid: TrainID,
     },
+    HumanArriveStation {
+        sid: StationID,
+        lid: LineID,
+    },
+    HumanEnteredStation {
+        sid: StationID,
+        lid: LineID,     // human enter station with a purpose of taking a particular line
+    },
+    HumanBoardTrain {
+        lid: LineID,
+        sid: StationID,
+        tid: TrainID,
+    },
+    HumanUnboardTrain {
+        lid: LineID,
+        sid: StationID,
+        tid: TrainID,
+    },
+    HumanLeaveStation {
+        sid: StationID,   // not sure any more variants needed here
+    }
 }
 
 // think about the design of data structures here
