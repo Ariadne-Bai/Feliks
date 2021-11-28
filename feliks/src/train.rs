@@ -13,28 +13,29 @@ pub struct Train {
 
 impl Train {
     pub fn new(id: TrainID, line: LineID, speed: u32, sid: StationID, time: Time) -> Self {
-        Train { 
-            id, 
-            line, 
-            speed, 
-            state: TrainState::StopInStation{ sid: sid, since: time },
+        Train {
+            id,
+            line,
+            speed,
+            state: TrainState::StopInStation {
+                sid: sid,
+                since: time,
+            },
         }
     }
-    
+
     // TODO : this has not been implemented!!!!!!
-    pub fn update_state(&mut self, event: Event) {
-        
-    }
+    pub fn update_state(&mut self, event: Event) {}
 }
 
 // my current understanding is that train state is mainly for GUI drawing
 enum TrainState {
     // stop at a particular stationID
-    StopInStation{sid: StationID, since: Time},
+    StopInStation { sid: StationID, since: Time },
     // running on the trail after some station
-    RunOnTrail{sid: StationID, since: Time},
+    RunOnTrail { sid: StationID, since: Time },
     // the train has departed the last station, which means it has finished all travel
-    Finished{since: Time},
+    Finished { since: Time },
 }
 
 // could have some property like 'capacity', and state of 'crowd size'
@@ -47,7 +48,12 @@ pub struct Station {
 
 impl Station {
     pub fn new(id: StationID, name: String, corx: Distance, cory: Distance) -> Self {
-        Station { id, name, corx, cory }
+        Station {
+            id,
+            name,
+            corx,
+            cory,
+        }
     }
 }
 
@@ -67,14 +73,19 @@ pub struct LineTimeTable {
 
 // this is just a tmp structure for setting up a line time table
 pub struct StationTimeTable {
-    id: StationID,
-    stop_time: Time,
-    distance_next: Option<Distance>,
-    station_next: Option<StationID>,
+    pub id: StationID,
+    pub stop_time: Time,
+    pub distance_next: Option<Distance>,
+    pub station_next: Option<StationID>,
 }
 
 impl StationTimeTable {
-    pub fn new(id: StationID, stop_time: Time, dn: Option<Distance>, sn: Option<StationID>) -> Self {
+    pub fn new(
+        id: StationID,
+        stop_time: Time,
+        dn: Option<Distance>,
+        sn: Option<StationID>,
+    ) -> Self {
         StationTimeTable {
             id,
             stop_time,
@@ -128,6 +139,15 @@ impl LineTimeTable {
 
     pub fn get_first_station(&self) -> StationID {
         *self.stations.get(0).unwrap()
+    }
+
+    pub fn get_last_station(&self, sid: StationID) -> Option<StationID> {
+        if sid == self.get_first_station() {
+            None
+        } else {
+            let index = self.stations.iter().position(|&r| r == sid).unwrap();
+            Some(*self.stations.get(index - 1).unwrap())
+        }
     }
 
     // schedule events for train starting time;

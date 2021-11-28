@@ -1,4 +1,5 @@
-use crate::{custom_types::*};
+use crate::custom_types::*;
+use crate::train::Train;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
@@ -7,9 +8,38 @@ use std::collections::{BinaryHeap, HashMap};
 #[derive(Serialize, Deserialize, PartialEq, Eq, Hash, PartialOrd, Ord, Clone, Debug)]
 pub enum Event {
     // depart from a stationID
-    TrainDeparture { lid: LineID, sid: StationID, tid: TrainID },
+    TrainDeparture {
+        lid: LineID,
+        sid: StationID,
+        tid: TrainID,
+    },
     // arrive at a stationID
-    TrainArrival { lid: LineID, sid: StationID, tid: TrainID },
+    TrainArrival {
+        lid: LineID,
+        sid: StationID,
+        tid: TrainID,
+    },
+    HumanArriveStation {
+        sid: StationID,
+        lid: LineID,
+    },
+    HumanEnteredStation {
+        sid: StationID,
+        lid: LineID,     // human enter station with a purpose of taking a particular line
+    },
+    HumanBoardTrain {
+        lid: LineID,
+        sid: StationID,
+        tid: TrainID,
+    },
+    HumanUnboardTrain {
+        lid: LineID,
+        sid: StationID,
+        tid: TrainID,
+    },
+    HumanLeaveStation {
+        sid: StationID,   // not sure any more variants needed here
+    }
 }
 
 // think about the design of data structures here
@@ -38,7 +68,10 @@ impl Scheduler {
             None => None,
             Some(item) => {
                 if item.time <= cur_time {
-                    println!("successfully consumed a event {:?} at cur_time {}", item.event, cur_time);
+                    println!(
+                        "successfully consumed a event {:?} at cur_time {}",
+                        item.event, cur_time
+                    );
                     Some(item.event)
                 } else {
                     self.items.push(item);
