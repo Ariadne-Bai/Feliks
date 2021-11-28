@@ -6,7 +6,7 @@ use std::collections::HashMap;
 pub struct Human {
     id: HumanID,
     goal: TripUnit,   // src->dest. this is set when agents are initialized
-    plan: Vec<TripUnit>,   // computed planed path
+    plan: Vec<TripUnit>,   // computed planed path (shortest path algorithm)
     trip: Vec<TripUnit>,   // what actually happened
 }
 
