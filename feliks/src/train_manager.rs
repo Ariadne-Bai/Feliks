@@ -32,11 +32,14 @@ impl<'a> TrainManager<'a> {
 
     // TODO: train system initializations
 
-    pub fn register_station(&mut self, name: String, corx: Distance, cory: Distance) -> StationID {
+    pub fn register_station(&mut self, name: String, corx: Distance, cory: Distance) -> (StationID, String) {
+        let qs = format!("CREATE (a:Station:Static {{ name: \"{}\", corX: {}, corY: {}}})", &name, corx, cory);
+        
         let st = Station::new(self.next_station, name, corx, cory);
         self.stations.insert(self.next_station, st);
         self.next_station += 1;
-        self.next_station - 1
+        
+        (self.next_station - 1, qs)
     }
 
     pub fn register_linetable(&mut self, name: String, speed: u32) -> LineID {
