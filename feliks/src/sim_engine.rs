@@ -1,6 +1,6 @@
 use std::io::BufRead;
 
-use crate::{custom_types::*, schedule::*, train_manager::{*}};
+use crate::{custom_types::*, schedule::*, train_manager::*};
 
 /**
  * drive state updated in the whole system
@@ -26,7 +26,8 @@ impl<'a> SimEngine<'a> {
     // sim engine should be responsible for spawning new agents
     // for each line, schedule event for each start time, and register a trian object
     pub fn spawn_train(&mut self, time: Time, lid: LineID, sid: StationID, tid: TrainID) {
-        self.scheduler.push(time, Event::TrainArrival{lid, sid, tid});
+        self.scheduler
+            .push(time, Event::TrainArrival { lid, sid, tid });
     }
 
     pub fn do_step(&mut self, cur_time: Time) -> Vec<String> {
@@ -34,13 +35,13 @@ impl<'a> SimEngine<'a> {
         while let Some(event) = self.scheduler.consume(cur_time) {
             self.count_sim += 1;
             match event {
-                Event::TrainArrival{ lid, sid, tid} => {
+                Event::TrainArrival { lid, sid, tid } => {
                     let res = self.train_manager.handle_event(event);
                     self.scheduler.push(cur_time + res.0, res.1.unwrap());
                     let qs = "CREATE (v: Event {type: \"TrainArrival\"})".to_string();
                     resqs.push(qs);
                 }
-                Event::TrainDeparture{ lid, sid, tid} => {
+                Event::TrainDeparture { lid, sid, tid } => {
                     let res = self.train_manager.handle_event(event);
                     // only schedule new event if there is another station; otherwise do nothing
                     res.1.map(|event| {
@@ -56,7 +57,6 @@ impl<'a> SimEngine<'a> {
     }
 }
 
-
 // #[cfg(test)]
 // mod test {
 //     use crate::train::StationTimeTable;
@@ -68,20 +68,20 @@ impl<'a> SimEngine<'a> {
 //         let mut sch = Scheduler::new();
 //         let mut trmanager = TrainManager::new();
 //         let mut simengine = SimEngine::new(&mut sch, &mut trmanager);
-        
+
 //         let appId = simengine.train_manager.register_station("Apple".to_string(), 0, 0);
 //         let banId = simengine.train_manager.register_station("Banana".to_string(), 50, 0);
 //         let cocId =  simengine.train_manager.register_station("Coconut".to_string(), 150, 0);
 //         let draId = simengine.train_manager.register_station("Dragonfruit".to_string(), 150, 100);
 
 //         let fruityId = simengine.train_manager.register_linetable("FRUITY".to_string(), 10);
-        
+
 //         // add station timetables
 //         simengine.train_manager.add_station_toline(fruityId, StationTimeTable::new(appId, 5, Some(50), Some(banId)));
 //         simengine.train_manager.add_station_toline(fruityId, StationTimeTable::new(banId, 6, Some(100), Some(cocId)));
 //         simengine.train_manager.add_station_toline(fruityId, StationTimeTable::new(cocId, 7, Some(100), Some(draId)));
 //         simengine.train_manager.add_station_toline(fruityId, StationTimeTable::new(draId, 8, None, None));
-         
+
 //         // expected results:
 //         // train 0: (s0, Arr, 10), (s0, Dep, 15), (s1, Arr, 20), (s1, Dep, 26), (s2, Arr, 36), (s2, Dep, 43), (s3, Arr, 53), (s3, Dep, 61)
 //         // train 0: (s0, Arr, 35), (s0, Dep, 40), (s1, Arr, 45), (s1, Dep, 51), (s2, Arr, 61), (s2, Dep, 68), (s3, Arr, 78), (s3, Dep, 86)
@@ -94,7 +94,7 @@ impl<'a> SimEngine<'a> {
 //             let ntid = simengine.train_manager.register_train(fruityId, appId, time);
 //             simengine.spawn_train(time, fruityId, appId, ntid);
 //         }
-        
+
 //         let mut clock = 0;
 //         loop {
 //             if clock >= 200 {
@@ -104,4 +104,3 @@ impl<'a> SimEngine<'a> {
 //             clock += 1;
 //         }
 //     }
-    
