@@ -75,7 +75,7 @@ pub struct LineTimeTable {
 pub struct StationTimeTable {
     pub id: StationID,
     pub stop_time: Time,
-    distance_next: Option<Distance>,
+    pub distance_next: Option<Distance>,
     pub station_next: Option<StationID>,
 }
 
@@ -139,6 +139,15 @@ impl LineTimeTable {
 
     pub fn get_first_station(&self) -> StationID {
         *self.stations.get(0).unwrap()
+    }
+
+    pub fn get_last_station(&self, sid: StationID) -> Option<StationID> {
+        if sid == self.get_first_station() {
+            None
+        } else {
+            let index = self.stations.iter().position(|&r| r == sid).unwrap();
+            Some(*self.stations.get(index - 1).unwrap())
+        }
     }
 
     // schedule events for train starting time;

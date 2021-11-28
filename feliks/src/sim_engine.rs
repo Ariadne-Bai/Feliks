@@ -38,8 +38,16 @@ impl<'a> SimEngine<'a> {
                 Event::TrainArrival { lid, sid, tid } => {
                     let res = self.train_manager.handle_event(event);
                     self.scheduler.push(cur_time + res.0, res.1.unwrap());
-                    let qs = "CREATE (v: Event {type: \"TrainArrival\"})".to_string();
+                    
+                    let qs = format!("CREATE (v:TrainArrival:Event {{ lineID:{}, stationID:{}, trainID:{}, time:{}}})", lid, sid, tid, cur_time);
                     resqs.push(qs);
+                    let qstation = format!("MATCH (v:TrainArrival:Event), (st:Station) WHERE v.stationID = {} AND v.trainID = {} AND st.stationID = {} CREATE (v)-[:AT_STATION]->(st)", sid, tid, sid);
+                    resqs.push(qstation);
+                    // find the departure event on the previous station
+                    if let Some(psid) = self.train_manager.find_last_station(lid, sid) {
+                        let qspst = format!("MATCH (v:TrainArrival:Event), (pv:TrainDeparture) WHERE v.lineID = {} AND v.stationID = {} AND v.trainID = {} AND pv.lineID = {} AND pv.stationID = {} AND pv.trainID = {} CREATE (pv)-[:RUN]->(v)", lid, sid, tid, lid, psid, tid);
+                        resqs.push(qspst);
+                    }
                 }
                 Event::TrainDeparture { lid, sid, tid } => {
                     let res = self.train_manager.handle_event(event);
@@ -47,8 +55,13 @@ impl<'a> SimEngine<'a> {
                     res.1.map(|event| {
                         self.scheduler.push(cur_time + res.0, event);
                     });
-                    let qs = "CREATE (v: Event {type: \"TrainDeparture\"})".to_string();
+
+                    let qs = format!("CREATE (v:TrainDeparture:Event {{ lineID:{}, stationID:{}, trainID:{}, time:{}}})", lid, sid, tid, cur_time);
                     resqs.push(qs);
+                    let qs_st = format!("MATCH (v:TrainDeparture), (pv:TrainArrival) WHERE v.lineID = {} AND v.stationID = {} AND v.trainID = {} AND pv.lineID = {} AND pv.stationID = {} AND pv.trainID = {} CREATE (pv)-[:STOP]->(v)", lid, sid, tid, lid, sid, tid);
+                    resqs.push(qs_st);
+                    let qstation = format!("MATCH (v:TrainDeparture:Event), (st:Station) WHERE v.stationID = {} AND v.trainID = {} AND st.stationID = {} CREATE (v)-[:AT_STATION]->(st)", sid, tid, sid);
+                    resqs.push(qstation);
                 }
             }
         }

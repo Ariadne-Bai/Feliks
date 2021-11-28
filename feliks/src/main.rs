@@ -85,7 +85,7 @@ async fn main() {
 
     // add station timetables
     let mut qstb = Vec::new();
-    
+
     let mut qstb_app = simengine.train_manager.add_station_toline(
         fruityId,
         StationTimeTable::new(appId.0, 5, Some(50), Some(banId.0)),

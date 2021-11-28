@@ -85,12 +85,12 @@ impl<'a> TrainManager<'a> {
 
                 if let Some(next_station) = stt.station_next {
                     let qs_ns_link = format!(
-                        "MATCH (a:Station), (b:Station) WHERE a.stationID = {} AND b.stationID = {} CREATE (a)-[:NEXT_STATION]->(b)", 
-                        stt.id, next_station
+                        "MATCH (a:Station), (b:Station) WHERE a.stationID = {} AND b.stationID = {} CREATE (a)-[rel:NEXT_STATION]->(b) SET rel.distance = {}", 
+                        stt.id, next_station, stt.distance_next.unwrap()
                     );
                     qss.push(qs_ns_link);
                 }
-                
+
                 ltb.add_station(stt);
             }
             None => {
@@ -122,15 +122,9 @@ impl<'a> TrainManager<'a> {
         }
     }
 
-    // This does not work! always double borrow...
-    // pub fn initialize_trains(&mut self) {
-    //     for (lid, ltb) in &mut self.lineTables {
-    //         let fsid = ltb.get_first_station();
-    //         for stime in ltb.get_new_times() {
-    //             self.register_train(*lid, fsid, *stime);
-    //         }
-    //     }
-    // }
+    pub fn find_last_station(&self, lid: LineID, sid: StationID) -> Option<StationID> {
+        self.lineTables.get(&lid).unwrap().get_last_station(sid)
+    }
 
     pub fn handle_event(&mut self, event: Event) -> (Time, Option<Event>) {
         match event {
