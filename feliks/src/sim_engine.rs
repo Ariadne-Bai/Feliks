@@ -1,6 +1,6 @@
 use std::io::BufRead;
 
-use crate::{custom_types::*, schedule::*, train_manager::{*, self}};
+use crate::{custom_types::*, schedule::*, train_manager::{*}};
 
 /**
  * drive state updated in the whole system
@@ -8,7 +8,7 @@ use crate::{custom_types::*, schedule::*, train_manager::{*, self}};
 
 pub struct SimEngine<'a> {
     // number of state computation the system generates
-    count_sim: u32,
+    pub count_sim: u32,
     // the SimEngine itself does not holds any state. but it mutate states of others
     scheduler: &'a mut Scheduler,
     pub train_manager: &'a mut TrainManager<'a>,
@@ -29,13 +29,16 @@ impl<'a> SimEngine<'a> {
         self.scheduler.push(time, Event::TrainArrival{lid, sid, tid});
     }
 
-    pub fn do_step(&mut self, cur_time: Time) {
+    pub fn do_step(&mut self, cur_time: Time) -> Vec<String> {
+        let mut resqs = Vec::new();
         while let Some(event) = self.scheduler.consume(cur_time) {
             self.count_sim += 1;
             match event {
                 Event::TrainArrival{ lid, sid, tid} => {
                     let res = self.train_manager.handle_event(event);
                     self.scheduler.push(cur_time + res.0, res.1.unwrap());
+                    let qs = "CREATE (v: Event {type: \"TrainArrival\"})".to_string();
+                    resqs.push(qs);
                 }
                 Event::TrainDeparture{ lid, sid, tid} => {
                     let res = self.train_manager.handle_event(event);
@@ -43,10 +46,13 @@ impl<'a> SimEngine<'a> {
                     res.1.map(|event| {
                         self.scheduler.push(cur_time + res.0, event);
                     });
+                    let qs = "CREATE (v: Event {type: \"TrainDeparture\"})".to_string();
+                    resqs.push(qs);
                 }
             }
         }
         // the loop should break when there is no more event at this time point
+        resqs
     }
 }
 
