@@ -35,9 +35,9 @@ async fn execute(qs: &String, g: &Arc<Graph>) {
 async fn main() {
     println!("Hello, world!");
 
+    let neoflag = false;
+
     let g = createNeo().await;
-    let test_q_s = "CREATE (p:Person {id: $id})".to_string();
-    // execute(test_q_s, g).await;
 
     let mut sch = Scheduler::new();
     let mut trmanager = TrainManager::new();
@@ -71,10 +71,13 @@ async fn main() {
     qs_stations.push(&milId.1);
 
     // add stations to neo
-    for qs in qs_stations {
-        println!("query string for new station {}", &qs);
-        execute(&qs, &g).await;
+    if neoflag {
+        for qs in qs_stations {
+            println!("query string for new station {}", &qs);
+            execute(&qs, &g).await;
+        }
     }
+    
 
     let fruityId = simengine
         .train_manager
@@ -127,9 +130,11 @@ async fn main() {
     qstb.append(&mut qstb_mil);
 
     // add station tables and next station links to neo
-    for qs in qstb {
-        println!("query string for new station {}", &qs);
-        execute(&qs, &g).await;
+    if neoflag {
+        for qs in qstb {
+            println!("query string for new station {}", &qs);
+            execute(&qs, &g).await;
+        }
     }
 
     // expected results:
@@ -167,9 +172,12 @@ async fn main() {
         }
         let qss = simengine.do_step(clock);
         // add the newly generated events to the database
-        for qs in qss {
-            execute(&qs, &g).await;
+        if (neoflag) {
+            for qs in qss {
+                execute(&qs, &g).await;
+            }
         }
+        
 
         clock += 1;
     }

@@ -38,7 +38,7 @@ impl<'a> SimEngine<'a> {
                 Event::TrainArrival { lid, sid, tid } => {
                     let res = self.train_manager.handle_event(event);
                     self.scheduler.push(cur_time + res.0, res.1.unwrap());
-                    
+
                     let qs = format!("CREATE (v:TrainArrival:Event {{ lineID:{}, stationID:{}, trainID:{}, time:{}}})", lid, sid, tid, cur_time);
                     resqs.push(qs);
                     let qstation = format!("MATCH (v:TrainArrival:Event), (st:Station) WHERE v.stationID = {} AND v.trainID = {} AND st.stationID = {} CREATE (v)-[:AT_STATION]->(st)", sid, tid, sid);
