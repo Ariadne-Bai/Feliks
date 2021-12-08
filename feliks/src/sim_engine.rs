@@ -63,6 +63,21 @@ impl<'a> SimEngine<'a> {
                     let qstation = format!("MATCH (v:TrainDeparture:Event), (st:Station) WHERE v.stationID = {} AND v.trainID = {} AND st.stationID = {} CREATE (v)-[:AT_STATION]->(st)", sid, tid, sid);
                     resqs.push(qstation);
                 }
+                Event::HumanArriveStation {sid, lid} => {
+
+                }
+                Event::HumanEnteredStation {sid, lid} => {
+
+                }
+                Event::HumanBoardTrain {lid, sid, tid} => {
+
+                }
+                Event::HumanUnboardTrain{lid, sid,tid} => {
+
+                }
+                Event::HumanLeaveStation{sid} => {
+                    
+                }
             }
         }
         // the loop should break when there is no more event at this time point

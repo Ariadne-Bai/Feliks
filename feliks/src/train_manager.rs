@@ -10,6 +10,8 @@ use std::{collections::HashMap, marker::PhantomData};
 pub struct TrainManager<'a> {
     lineTables: HashMap<LineID, LineTimeTable>,
     stations: HashMap<StationID, Station>,
+    stationIdMap: HashMap<String, StationID>,
+    stationOnLines: HashMap<StationID, Vec<LineID>>,
     trains: HashMap<TrainID, Train>,
     next_line: LineID,
     next_station: StationID,
@@ -22,6 +24,8 @@ impl<'a> TrainManager<'a> {
         TrainManager {
             lineTables: HashMap::new(),
             stations: HashMap::new(),
+            stationIdMap: HashMap::new(),
+            stationOnLines: HashMap::new(),
             trains: HashMap::new(),
             next_line: 0,
             next_station: 0,
@@ -150,6 +154,21 @@ impl<'a> TrainManager<'a> {
                     }
                     None => (0, None),
                 }
+            }
+            Event::HumanArriveStation {sid, lid} => {
+                (0, None)
+            }
+            Event::HumanEnteredStation {sid, lid} => {
+                (0, None)
+            }
+            Event::HumanBoardTrain {lid, sid, tid} => {
+                (0, None)
+            }
+            Event::HumanUnboardTrain{lid, sid,tid} => {
+                (0, None)
+            }
+            Event::HumanLeaveStation{sid} => {
+                (0, None)
             }
         }
     }
