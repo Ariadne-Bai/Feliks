@@ -5,17 +5,39 @@ use std::collections::HashMap;
 
 pub struct Human {
     id: HumanID,
-    goal: TripUnit,   // src->dest. this is set when agents are initialized
+    // goal: TripUnit,   // src->dest. this is set when agents are initialized
     plan: Vec<TripUnit>,   // computed planed path (shortest path algorithm)
-    trip: Vec<TripUnit>,   // what actually happened
+    // trip: Vec<TripUnit>,   // what actually happened
+}
+
+impl Human {
+    pub fn new(id: HumanID) -> Self {
+        Human {
+            id,
+            plan: Vec::new(),
+        }
+    }
 }
 
 pub struct TripUnit {
+    line: LineID,
     on: StationID,
-    off: StationID,
+    off:  StationID,
     start_time: Option<Time>,
     end_time: Option<Time>,
 }
+
+impl TripUnit {
+    pub fn new(line: LineID, on: StationID, off: StationID, start: Time, end: Time) -> Self {
+        TripUnit {
+            line,
+            on,
+            off,
+            start_time: Some(start),
+            end_time: Some(end),
+        }
+    }
+} 
 
 enum HumanState {
     EnteringStation { sid: StationID, lid: LineID, since: Time },   // model things like security checks

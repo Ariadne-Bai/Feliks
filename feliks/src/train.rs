@@ -65,9 +65,11 @@ impl Station {
 pub struct LineTimeTable {
     id: LineID,
     name: String,
+    pub total_weight: u32,   // Eweight value of all stations on this line
     speed: u32,
-    stations: Vec<StationID>,
+    pub stations: Vec<StationID>,
     new_train_times: Vec<Time>,
+    station_acc_weights: Vec<u32>,
     station_tables: HashMap<StationID, StationTimeTable>,
 }
 
@@ -75,6 +77,7 @@ pub struct LineTimeTable {
 pub struct StationTimeTable {
     pub id: StationID,
     pub stop_time: Time,
+    pub weight: u32,
     pub distance_next: Option<Distance>,
     pub station_next: Option<StationID>,
 }
@@ -83,10 +86,12 @@ impl StationTimeTable {
     pub fn new(
         id: StationID,
         stop_time: Time,
+        weight: u32,
         dn: Option<Distance>,
         sn: Option<StationID>,
     ) -> Self {
         StationTimeTable {
+            weight,
             id,
             stop_time,
             distance_next: dn,
@@ -101,16 +106,31 @@ impl LineTimeTable {
         LineTimeTable {
             id: id,
             name: name,
+            total_weight: 0,
             speed: speed,
             stations: Vec::new(),
             new_train_times: Vec::new(),
+            station_acc_weights: Vec::new(),
             station_tables: HashMap::new(),
         }
     }
 
     pub fn add_station(&mut self, stt: StationTimeTable) {
         self.stations.push(stt.id);
+        self.total_weight += stt.weight;
+        self.station_acc_weights.push(self.total_weight);
         self.station_tables.insert(stt.id, stt);
+    }
+
+    pub fn find_station_weight(&self, weight: u32) -> (usize, StationID) {
+        for (idx, w) in self.station_acc_weights.iter().enumerate() {
+            if w >= &weight {
+                return (idx, *self.stations.get(idx).unwrap())
+            }
+        }
+        // should not reach here
+        println!("Cannot find station with weight {} on line {}", weight, self.id);
+        return (0, 0);
     }
 
     pub fn add_new_traintime(&mut self, time: Time) {

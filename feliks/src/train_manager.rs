@@ -1,5 +1,6 @@
-use crate::{custom_types::*, schedule::*, train::*};
+use crate::{custom_types::*, schedule::*, train::*, human::TripUnit};
 use std::{collections::HashMap, marker::PhantomData};
+use rand::Rng;
 
 /**
  * Central registry for trains, stations, lines
@@ -171,5 +172,46 @@ impl<'a> TrainManager<'a> {
                 (0, None)
             }
         }
+    }
+    
+
+    // a random trip generator
+    pub fn randomTrip(&self) -> Vec<TripUnit>{
+        let mut trip:Vec<TripUnit> = Vec::new();
+        // select a randome line to start
+        let mut rng = rand::thread_rng();
+        let numLines = self.next_line;
+
+        let lineStart = rng.gen_range(0..numLines);   // rand 取左开右闭区间
+
+        let stationsWeights = self.lineTables.get(&lineStart).unwrap().total_weight;
+        let startWeight = rng.gen_range(0..stationsWeights - 5);
+        let startStation = self.lineTables.get(&lineStart).unwrap().find_station_weight(startWeight);
+        let endWeight = rng.gen_range(startWeight+3..stationsWeights);
+        let endStation = self.lineTables.get(&lineStart).unwrap().find_station_weight(endWeight);
+    
+        // generate one trip unit
+        let startTime = rng.gen_range(360..1380);   // 6:00 - 23:00
+        let endTime = startTime + 2 * (endStation.0 - startStation.0);
+        trip.push(TripUnit::new(lineStart, startStation.1, endStation.1, startTime.try_into().unwrap(), endTime.try_into().unwrap()));
+
+
+        // let numTranLines = self.stationOnLines.get(&endStation.1).unwrap().len();
+        // // transit when there are more lines and a 1/3 chance (this is really a magic number here)
+        // if numTranLines > 2 && rng.gen_range(0..3) == 0 {
+        //     let mut tranLineIdx = 0;
+        //     loop {
+        //         tranLineIdx = rng.gen_range(0..numTranLines);
+        //         if self.stationOnLines.get(&endStation.1).unwrap().get(tranLineIdx).unwrap() != &lineStart {
+        //             break;
+        //         }
+        //     }
+        //     let lineTrans = self.stationOnLines.get(&endStation.1).unwrap().get(tranLineIdx).unwrap();
+            
+        // }
+
+
+       // let's ignore the transitting problem for now, although it looks like fun
+        trip
     }
 }

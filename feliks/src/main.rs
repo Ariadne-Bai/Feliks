@@ -3,6 +3,7 @@ pub mod schedule;
 pub mod sim_engine;
 pub mod train;
 pub mod train_manager;
+pub mod human;
 use crate::custom_types::*;
 use crate::sim_engine::SimEngine;
 use crate::train_manager::TrainManager;
@@ -91,42 +92,42 @@ async fn main() {
 
     let mut qstb_app = simengine.train_manager.add_station_toline(
         fruityId,
-        StationTimeTable::new(appId.0, 5, Some(50), Some(banId.0)),
+        StationTimeTable::new(appId.0, 5, 1, Some(50), Some(banId.0)),
     );
     qstb.append(&mut qstb_app);
 
     let mut qstb_ban = simengine.train_manager.add_station_toline(
         fruityId,
-        StationTimeTable::new(banId.0, 6, Some(100), Some(cocId.0)),
+        StationTimeTable::new(banId.0, 6, 1,Some(100), Some(cocId.0)),
     );
     qstb.append(&mut qstb_ban);
 
     let mut qstb_coc = simengine.train_manager.add_station_toline(
         fruityId,
-        StationTimeTable::new(cocId.0, 7, Some(100), Some(draId.0)),
+        StationTimeTable::new(cocId.0, 7, 2,Some(100), Some(draId.0)),
     );
     qstb.append(&mut qstb_coc);
 
     let mut qstb_dra = simengine
         .train_manager
-        .add_station_toline(fruityId, StationTimeTable::new(draId.0, 8, None, None));
+        .add_station_toline(fruityId, StationTimeTable::new(draId.0, 8, 3,None, None));
     qstb.append(&mut qstb_dra);
 
     let mut qstb_cho = simengine.train_manager.add_station_toline(
         sweetyId,
-        StationTimeTable::new(choId.0, 10, Some(70), Some(cocId.0)),
+        StationTimeTable::new(choId.0, 10, 2,Some(70), Some(cocId.0)),
     );
     qstb.append(&mut qstb_cho);
 
     let mut qstb_coc_sw = simengine.train_manager.add_station_toline(
         sweetyId,
-        StationTimeTable::new(cocId.0, 10, Some(70), Some(milId.0)),
+        StationTimeTable::new(cocId.0, 10, 2,Some(70), Some(milId.0)),
     );
     qstb.append(&mut qstb_coc_sw);
 
     let mut qstb_mil = simengine
         .train_manager
-        .add_station_toline(sweetyId, StationTimeTable::new(milId.0, 10, None, None));
+        .add_station_toline(sweetyId, StationTimeTable::new(milId.0, 10, 3,None, None));
     qstb.append(&mut qstb_mil);
 
     // add station tables and next station links to neo
