@@ -1,12 +1,13 @@
 use crate::{custom_types::*, schedule::*};
 use std::collections::HashMap;
+use serde::{Deserialize, Serialize};
 
 // how to be a human being? in a traffic simulation system?
 
 pub struct Human {
     id: HumanID,
     // goal: TripUnit,   // src->dest. this is set when agents are initialized
-    plan: Vec<TripUnit>,   // computed planed path (shortest path algorithm)
+    pub plan: Vec<TripUnit>,   // computed planed path (shortest path algorithm)
     // trip: Vec<TripUnit>,   // what actually happened
 }
 
@@ -19,6 +20,8 @@ impl Human {
     }
 }
 
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TripUnit {
     line: LineID,
     on: StationID,

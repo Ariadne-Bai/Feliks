@@ -212,6 +212,7 @@ impl<'a> TrainManager<'a> {
 
 
        // let's ignore the transitting problem for now, although it looks like fun
+        println!("generated a random trip {:?}", trip);
         trip
     }
 }

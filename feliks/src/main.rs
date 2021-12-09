@@ -4,9 +4,11 @@ pub mod sim_engine;
 pub mod train;
 pub mod train_manager;
 pub mod human;
+pub mod human_manager;
 use crate::custom_types::*;
 use crate::sim_engine::SimEngine;
 use crate::train_manager::TrainManager;
+use crate::human_manager::HumanManager;
 use schedule::Scheduler;
 
 use crate::train::{LineTimeTable, StationTimeTable};
