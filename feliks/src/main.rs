@@ -38,7 +38,7 @@ async fn execute(qs: &String, g: &Arc<Graph>) {
 async fn main() {
     println!("Hello, world!");
 
-    let neoflag = false;
+    let neoflag = true;
 
     let g = createNeo().await;
 
@@ -189,7 +189,7 @@ async fn main() {
     // create human
     let mut numHumans = 0;
     loop {
-        if numHumans >= 5 {
+        if numHumans >= 15 {
             break;
         }
 
@@ -222,6 +222,7 @@ async fn main() {
         // add the newly generated events to the database
         if (neoflag) {
             for qs in qss {
+                println!("got query {}", qs);
                 execute(&qs, &g).await;
             }
         }

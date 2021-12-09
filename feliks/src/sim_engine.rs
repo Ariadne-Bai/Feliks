@@ -104,17 +104,49 @@ impl<'a> SimEngine<'a> {
 
                     // SQL: create a trip node, create trip - prevTrip, trip - start, trip - end relationship
                     // this could be done in the spawn human method
+                    let qs_start = format!(
+                        "MATCH (st:Station), (tr: TripLog) WHERE st.stationID = {} AND tr.tripID = {} CREATE (tr)-[:PLAN_START]->(st)", sid, trid
+                    ); 
+                    resqs.push(qs_start);
+                    let qs_end = format!(
+                        "MATCH (st:Station), (tr: TripLog) WHERE st.stationID = {} AND tr.tripID = {} CREATE (tr)-[:PLAN_END]->(st)", dsid, trid
+                    );
+                    resqs.push(qs_end);
                 }
                 Event::HumanBoardTrain {hid, lid, sid, tid, trid} => {
                     // SQL: HumanBoardTrain Node
                     // SQL: station - event relationship
                     // SQL: trip - event relationship
+                    let qs_event = format!(
+                        "CREATE (v:HumanBoardTrain:Event {{ humanID: {}, lineID:{}, stationID:{}, trainID:{}, tripID:{}, time:{}}})", hid, lid, sid, tid, trid, cur_time
+                    );
+                    resqs.push(qs_event);
+                    let qs_station = format!(
+                        "MATCH (st:Station), (v:HumanBoardTrain) WHERE st.stationID = {} AND v.stationID =  {} AND v.tripID = {} CREATE (v)-[:STATION]->(st)", sid, sid, trid
+                    );
+                    resqs.push(qs_station);
+                    let qs_trip = format!(
+                        "MATCH (v:HumanBoardTrain), (tr:TripLog) WHERE v.tripID = {} AND tr.tripID = {} CREATE (tr)-[:START]->(v)", trid, trid
+                    );
+                    resqs.push(qs_trip);
                     println!("A HumanBoardTrain Event hid {} lid {} sid {} tid {} trid {}", hid, lid, sid, tid, trid);
                 }
                 Event::HumanUnboardTrain{hid, lid, sid,tid, trid} => {
                     // SQL: HumanUnboardTrain Node
                     // SQL: station - unboard relationship 
                     // SQL: trip - event relationship
+                    let qs_event = format!(
+                        "CREATE (v:HumanUnboardTrain:Event {{ humanID: {}, lineID:{}, stationID:{}, trainID:{}, tripID:{}, time:{}}})", hid, lid, sid, tid, trid, cur_time
+                    );
+                    resqs.push(qs_event);
+                    let qs_station = format!(
+                        "MATCH (st:Station), (v:HumanUnboardTrain) WHERE st.stationID = {} AND v.stationID =  {} AND v.tripID = {} CREATE (v)-[:STATION]->(st)", sid, sid, trid
+                    );
+                    resqs.push(qs_station);
+                    let qs_trip = format!(
+                        "MATCH (v:HumanUnboardTrain), (tr:TripLog) WHERE v.tripID = {} AND tr.tripID = {} CREATE (tr)-[:END]->(v)", trid, trid
+                    );
+                    resqs.push(qs_trip);
                     println!("A HumanUnoardTrain Event hid {} lid {} sid {} tid {} trid {}", hid, lid, sid, tid, trid);
                 }
                 Event::HumanLeaveStation{hid, sid} => {
