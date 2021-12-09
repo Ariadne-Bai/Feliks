@@ -20,24 +20,29 @@ pub enum Event {
         tid: TrainID,
     },
     HumanArriveStation {
+        hid: HumanID,
         sid: StationID,
         lid: LineID,
     },
     HumanEnteredStation {
+        hid: HumanID,
         sid: StationID,
         lid: LineID,     // human enter station with a purpose of taking a particular line
     },
     HumanBoardTrain {
+        hid: HumanID,
         lid: LineID,
         sid: StationID,
         tid: TrainID,
     },
     HumanUnboardTrain {
+        hid: HumanID,
         lid: LineID,
         sid: StationID,
         tid: TrainID,
     },
     HumanLeaveStation {
+        hid: HumanID,
         sid: StationID,   // not sure any more variants needed here
     }
 }

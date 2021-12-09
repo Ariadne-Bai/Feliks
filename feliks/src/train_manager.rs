@@ -1,4 +1,4 @@
-use crate::{custom_types::*, schedule::*, train::*, human::TripUnit};
+use crate::{custom_types::*, schedule::*, train::*, human::{TripUnit, HumanState}};
 use std::{collections::HashMap, marker::PhantomData};
 use rand::Rng;
 
@@ -156,19 +156,19 @@ impl<'a> TrainManager<'a> {
                     None => (0, None),
                 }
             }
-            Event::HumanArriveStation {sid, lid} => {
+            Event::HumanArriveStation {hid, sid, lid} => {
                 (0, None)
             }
-            Event::HumanEnteredStation {sid, lid} => {
+            Event::HumanEnteredStation {hid, sid, lid} => {
                 (0, None)
             }
-            Event::HumanBoardTrain {lid, sid, tid} => {
+            Event::HumanBoardTrain {hid, lid, sid, tid} => {
                 (0, None)
             }
-            Event::HumanUnboardTrain{lid, sid,tid} => {
+            Event::HumanUnboardTrain{hid, lid, sid,tid} => {
                 (0, None)
             }
-            Event::HumanLeaveStation{sid} => {
+            Event::HumanLeaveStation{hid, sid} => {
                 (0, None)
             }
         }
@@ -214,5 +214,9 @@ impl<'a> TrainManager<'a> {
        // let's ignore the transitting problem for now, although it looks like fun
         println!("generated a random trip {:?}", trip);
         trip
+    }
+
+    pub fn putWaitingHuman(&mut self, hid: HumanID, sid: StationID, lid: LineID, since: Time) {
+        self.stations.get_mut(&sid).unwrap().wait_queue.push_back(HumanState::QueueingForTrain{ hid, sid, lid, since });
     }
 }

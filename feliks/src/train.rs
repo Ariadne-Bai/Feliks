@@ -1,5 +1,6 @@
-use crate::{custom_types::*, schedule::*};
+use crate::{custom_types::*, schedule::*, human::*};
 use std::collections::HashMap;
+use std::collections::VecDeque;
 // a trait/struct for train, holds state of the train
 pub struct Train {
     // train id should be the same as the index of this train in TimeTable.start_times
@@ -9,6 +10,7 @@ pub struct Train {
     // train run at the same speed as long as it start, no acceleration consitered
     pub speed: u32,
     state: TrainState,
+    pub passengers_queue: VecDeque<HumanState>,
 }
 
 impl Train {
@@ -21,6 +23,7 @@ impl Train {
                 sid: sid,
                 since: time,
             },
+            passengers_queue: VecDeque::new(),
         }
     }
 
@@ -44,6 +47,7 @@ pub struct Station {
     name: String,
     corx: Distance,
     cory: Distance,
+    pub wait_queue: VecDeque<HumanState>,
 }
 
 impl Station {
@@ -53,7 +57,8 @@ impl Station {
             name,
             corx,
             cory,
-        }
+            wait_queue: VecDeque::new(),
+       }
     }
 }
 

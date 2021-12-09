@@ -23,11 +23,11 @@ impl Human {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TripUnit {
-    line: LineID,
-    on: StationID,
-    off:  StationID,
-    start_time: Option<Time>,
-    end_time: Option<Time>,
+    pub line: LineID,
+    pub on: StationID,
+    pub off:  StationID,
+    pub start_time: Time,
+    pub end_time: Time,
 }
 
 impl TripUnit {
@@ -36,17 +36,18 @@ impl TripUnit {
             line,
             on,
             off,
-            start_time: Some(start),
-            end_time: Some(end),
+            start_time: start,
+            end_time: end,
         }
     }
 } 
 
-enum HumanState {
-    EnteringStation { sid: StationID, lid: LineID, since: Time },   // model things like security checks
-    QueueingForTrain { sid: StationID, lid: LineID, since: Time },
-    OnTrain { lid: LineID, tid: TrainID, to_sid: LineID, since: Time },  // plan to get off at to_sid station
-    Finished { since: Time }, // for simplicity: consider off the last train as trip finished
+// for simplicity we ignore ArriveStation event and EnteringStation state for now
+pub enum HumanState {
+    EnteringStation { hid: HumanID, sid: StationID, lid: LineID, since: Time },   // model things like security checks
+    QueueingForTrain { hid: HumanID, sid: StationID, lid: LineID, since: Time },
+    OnTrain { hid: HumanID, lid: LineID, tid: TrainID, to_sid: LineID, since: Time },  // plan to get off at to_sid station
+    Finished { hid: HumanID, since: Time }, // for simplicity: consider off the last train as trip finished
 }
 
 // when a human is initialized

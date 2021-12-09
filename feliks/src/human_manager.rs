@@ -22,7 +22,7 @@ use std::collections::HashMap;
          }
      }
      
-     // add the generated trip into human
+     // add the generated trip plan into human
      pub fn register_human(
          &mut self, plan: Vec<TripUnit>
      ) -> (HumanID, String) {

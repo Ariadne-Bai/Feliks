@@ -1,6 +1,6 @@
 use std::io::BufRead;
 
-use crate::{custom_types::*, schedule::*, train_manager::*};
+use crate::{custom_types::*, schedule::*, train_manager::*, human::*};
 
 /**
  * drive state updated in the whole system
@@ -28,6 +28,18 @@ impl<'a> SimEngine<'a> {
     pub fn spawn_train(&mut self, time: Time, lid: LineID, sid: StationID, tid: TrainID) {
         self.scheduler
             .push(time, Event::TrainArrival { lid, sid, tid });
+    }
+
+    pub fn spawn_human(&mut self, plan: &Vec<TripUnit>, hid: HumanID) {
+        if let Some(trip) = plan.first() {
+            let lid = trip.line;
+            let sid = trip.on;
+            let time = trip.start_time;
+            self.scheduler.push(time, Event::HumanEnteredStation { hid, lid, sid });
+
+            // push this human into the station waiting queue
+            self.train_manager.putWaitingHuman(hid, sid, lid, time);
+        }
     }
 
     pub fn do_step(&mut self, cur_time: Time) -> Vec<String> {
@@ -63,19 +75,19 @@ impl<'a> SimEngine<'a> {
                     let qstation = format!("MATCH (v:TrainDeparture:Event), (st:Station) WHERE v.stationID = {} AND v.trainID = {} AND st.stationID = {} CREATE (v)-[:AT_STATION]->(st)", sid, tid, sid);
                     resqs.push(qstation);
                 }
-                Event::HumanArriveStation {sid, lid} => {
+                Event::HumanArriveStation {hid, sid, lid} => {
 
                 }
-                Event::HumanEnteredStation {sid, lid} => {
+                Event::HumanEnteredStation {hid, sid, lid} => {
 
                 }
-                Event::HumanBoardTrain {lid, sid, tid} => {
+                Event::HumanBoardTrain {hid, lid, sid, tid} => {
 
                 }
-                Event::HumanUnboardTrain{lid, sid,tid} => {
+                Event::HumanUnboardTrain{hid, lid, sid,tid} => {
 
                 }
-                Event::HumanLeaveStation{sid} => {
+                Event::HumanLeaveStation{hid, sid} => {
                     
                 }
             }
