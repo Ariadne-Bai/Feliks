@@ -27,6 +27,7 @@ pub enum Event {
     HumanEnteredStation {
         hid: HumanID,
         sid: StationID,
+        dsid: StationID,   // enter station with a destination station
         lid: LineID,     // human enter station with a purpose of taking a particular line
     },
     HumanBoardTrain {

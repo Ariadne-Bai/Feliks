@@ -34,11 +34,10 @@ impl<'a> SimEngine<'a> {
         if let Some(trip) = plan.first() {
             let lid = trip.line;
             let sid = trip.on;
+            let dsid = trip.off;
             let time = trip.start_time;
-            self.scheduler.push(time, Event::HumanEnteredStation { hid, lid, sid });
-
-            // push this human into the station waiting queue
-            self.train_manager.putWaitingHuman(hid, sid, lid, time);
+            self.scheduler.push(time, Event::HumanEnteredStation { hid, sid, dsid, lid});
+            
         }
     }
 
@@ -50,6 +49,11 @@ impl<'a> SimEngine<'a> {
                 Event::TrainArrival { lid, sid, tid } => {
                     let res = self.train_manager.handle_event(event);
                     self.scheduler.push(cur_time + res.0, res.1.unwrap());
+
+                    // schedule offload event. offload event happens after this event, to make sure the Arrival node already exist
+                    for pevent in res.2.into_iter() {
+                        self.scheduler.push(cur_time + 1, pevent);
+                    }
 
                     let qs = format!("CREATE (v:TrainArrival:Event {{ lineID:{}, stationID:{}, trainID:{}, time:{}}})", lid, sid, tid, cur_time);
                     resqs.push(qs);
@@ -68,6 +72,11 @@ impl<'a> SimEngine<'a> {
                         self.scheduler.push(cur_time + res.0, event);
                     });
 
+                    // schedule onload event, onload happens after this event
+                    for pevent in res.2.into_iter() {
+                        self.scheduler.push(cur_time + 1, pevent);
+                    }
+
                     let qs = format!("CREATE (v:TrainDeparture:Event {{ lineID:{}, stationID:{}, trainID:{}, time:{}}})", lid, sid, tid, cur_time);
                     resqs.push(qs);
                     let qs_st = format!("MATCH (v:TrainDeparture), (pv:TrainArrival) WHERE v.lineID = {} AND v.stationID = {} AND v.trainID = {} AND pv.lineID = {} AND pv.stationID = {} AND pv.trainID = {} CREATE (pv)-[:STOP]->(v)", lid, sid, tid, lid, sid, tid);
@@ -76,16 +85,27 @@ impl<'a> SimEngine<'a> {
                     resqs.push(qstation);
                 }
                 Event::HumanArriveStation {hid, sid, lid} => {
-
+                    // ignore this case for now
+                    
                 }
-                Event::HumanEnteredStation {hid, sid, lid} => {
+                Event::HumanEnteredStation {hid, sid, dsid, lid} => {
+                    // push this human into the station waiting queue
+                    // ignore reschedule for now
+                    self.train_manager.putWaitingHuman(hid, sid, dsid, lid, cur_time);
 
+                    // SQL: create a trip node, create trip - prevTrip, trip - start, trip - end relationship
                 }
                 Event::HumanBoardTrain {hid, lid, sid, tid} => {
-
+                    // SQL: HumanBoardTrain Node
+                    // SQL: station - event relationship
+                    // SQL: trip - event relationship
+                    println!("A HumanBoardTrain Event hid {} lid {} sid {} tid {}", hid, lid, sid, tid);
                 }
                 Event::HumanUnboardTrain{hid, lid, sid,tid} => {
-
+                    // SQL: HumanUnboardTrain Node
+                    // SQL: station - unboard relationship 
+                    // SQL: trip - event relationship
+                    println!("A HumanUnoardTrain Event hid {} lid {} sid {} tid {}", hid, lid, sid, tid);
                 }
                 Event::HumanLeaveStation{hid, sid} => {
                     

@@ -1,4 +1,4 @@
-use crate::{custom_types::*, schedule::*, train::*, human::{TripUnit, HumanState}};
+use crate::{custom_types::*, schedule::*, train::*, human::{TripUnit, HumanState, self}};
 use std::{collections::HashMap, marker::PhantomData};
 use rand::Rng;
 
@@ -131,12 +131,35 @@ impl<'a> TrainManager<'a> {
         self.lineTables.get(&lid).unwrap().get_last_station(sid)
     }
 
-    pub fn handle_event(&mut self, event: Event) -> (Time, Option<Event>) {
+    pub fn handle_event(&mut self, event: Event) -> (Time, Option<Event>, Vec<Event>) {
+        let mut humanEvents = Vec::new();
         match event {
             Event::TrainArrival { lid, sid, tid } => {
                 // each arrival always map to a departure, event for the last station
                 let changeTime = self.lineTables.get(&lid).unwrap().get_stop_time(sid);
-                (changeTime, Some(Event::TrainDeparture { lid, sid, tid }))
+
+                // offload passengers, generate Event:HumanUnboardTrain
+                let mut offcap = self.trains.get(&tid).unwrap().passengers_queue.len();
+                loop {
+                    if self.trains.get(&tid).unwrap().passengers_queue.is_empty() {
+                        break;
+                    } else if offcap == 0 {
+                        // the loop has been looped through
+                        break;
+                    }
+                    let hsf = self.trains.get_mut(&tid).unwrap().passengers_queue.pop_front().unwrap();
+                    if hsf.2 == sid {
+                        // TODO: this passenger needs to get off, generate HumanUnboardEvent, and possibly delay event
+                        // ignore delay event for now
+                        humanEvents.push(Event::HumanUnboardTrain{hid: hsf.0, lid: hsf.3, sid: hsf.2, tid});
+                    } else {
+                        // this passenger does not get off at this station
+                        self.trains.get_mut(&tid).unwrap().passengers_queue.push_back(hsf);
+                    }
+                    offcap -= 1;
+                }
+                
+                (changeTime, Some(Event::TrainDeparture { lid, sid, tid }), humanEvents)
             }
             Event::TrainDeparture { lid, sid, tid } => {
                 self.train_update(event, tid);
@@ -150,26 +173,52 @@ impl<'a> TrainManager<'a> {
                             .unwrap()
                             .get_dis_next(sid)
                             .unwrap();
+
+                        // onload passengers, genetate Event:HumanBoardTrain
+                        // consume the station queue; if there's no next station we do not load people :) 
+                        let mut oncap = 50;
+                        loop {
+                            if self.stations.get(&sid).unwrap().wait_queue.is_empty() {
+                                break;
+                            } else if oncap == 0 {
+                                break;
+                            }
+                            let hsf = self.stations.get_mut(&sid).unwrap().wait_queue.pop_front().unwrap();
+                            if hsf.3 == lid {
+                                // this human get onboard, push into train passengers_queue
+                                self.trains.get_mut(&tid).unwrap().passengers_queue.push_back(hsf);
+
+                                // TODO: generate HumanBoardTrain Event; May generate HumanExtraWaitEvent
+                                // ignore wait event for now
+                                humanEvents.push(Event::HumanBoardTrain{hid: hsf.0, lid: hsf.3, sid: hsf.1, tid});
+                            } else {
+                                // put this human back, not waiting for this trian
+                                self.stations.get_mut(&sid).unwrap().wait_queue.push_back(hsf);
+                            }
+                            oncap -= 1;
+                        }
+
+
                         let speed = self.trains.get(&tid).unwrap().speed;
-                        (dis / speed, Some(Event::TrainArrival { lid, sid: st, tid }))
+                        (dis / speed, Some(Event::TrainArrival { lid, sid: st, tid }), humanEvents)
                     }
-                    None => (0, None),
+                    None => (0, None, humanEvents),
                 }
             }
             Event::HumanArriveStation {hid, sid, lid} => {
-                (0, None)
+                (0, None, humanEvents)
             }
-            Event::HumanEnteredStation {hid, sid, lid} => {
-                (0, None)
+            Event::HumanEnteredStation {hid, sid, dsid, lid} => {
+                (0, None, humanEvents)
             }
             Event::HumanBoardTrain {hid, lid, sid, tid} => {
-                (0, None)
+                (0, None, humanEvents)
             }
             Event::HumanUnboardTrain{hid, lid, sid,tid} => {
-                (0, None)
+                (0, None, humanEvents)
             }
             Event::HumanLeaveStation{hid, sid} => {
-                (0, None)
+                (0, None, humanEvents)
             }
         }
     }
@@ -216,7 +265,7 @@ impl<'a> TrainManager<'a> {
         trip
     }
 
-    pub fn putWaitingHuman(&mut self, hid: HumanID, sid: StationID, lid: LineID, since: Time) {
-        self.stations.get_mut(&sid).unwrap().wait_queue.push_back(HumanState::QueueingForTrain{ hid, sid, lid, since });
+    pub fn putWaitingHuman(&mut self, hid: HumanID, sid: StationID, dsid: StationID, lid: LineID, since: Time) {
+        self.stations.get_mut(&sid).unwrap().wait_queue.push_back((hid, sid, dsid, lid, since));
     }
 }
