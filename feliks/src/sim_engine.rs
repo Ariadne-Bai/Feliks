@@ -1,6 +1,6 @@
 use std::io::BufRead;
 
-use crate::{custom_types::*, schedule::*, train_manager::*, human::*};
+use crate::{custom_types::*, schedule::*, train_manager::*, human::*, human_manager::HumanManager};
 
 /**
  * drive state updated in the whole system
@@ -12,14 +12,16 @@ pub struct SimEngine<'a> {
     // the SimEngine itself does not holds any state. but it mutate states of others
     scheduler: &'a mut Scheduler,
     pub train_manager: &'a mut TrainManager<'a>,
+    pub human_manager: HumanManager,
 }
 
 impl<'a> SimEngine<'a> {
-    pub fn new(sch: &'a mut Scheduler, trm: &'a mut TrainManager<'a>) -> Self {
+    pub fn new(sch: &'a mut Scheduler, trm: &'a mut TrainManager<'a>, hum: HumanManager) -> Self {
         SimEngine {
             count_sim: 0,
             scheduler: sch,
             train_manager: trm,
+            human_manager: hum,
         }
     }
 
@@ -30,15 +32,22 @@ impl<'a> SimEngine<'a> {
             .push(time, Event::TrainArrival { lid, sid, tid });
     }
 
-    pub fn spawn_human(&mut self, plan: &Vec<TripUnit>, hid: HumanID, trid: TripID) {
-        if let Some(trip) = plan.first() {
-            let lid = trip.line;
-            let sid = trip.on;
-            let dsid = trip.off;
-            let time = trip.start_time;
-            self.scheduler.push(time, Event::HumanEnteredStation { hid, sid, dsid, lid, trid});
-            
-        }
+    pub fn spawn_human(&mut self, plan: TripUnit, hid: HumanID, trid: TripID) {
+        // if let Some(trip) = plan.first() {
+        //     let lid = trip.line;
+        //     let sid = trip.on;
+        //     let dsid = trip.off;
+        //     let time = trip.start_time;
+        //     self.scheduler.push(time, Event::HumanEnteredStation { hid, sid, dsid, lid, trid});
+        // }
+        let lid = plan.line;
+        let sid = plan.on;
+        let dsid = plan.off;
+        let time = plan.start_time;
+        // start a new trip each day
+        // let new_trid = self.human_manager.new_trip(hid);
+        // let's ignore new trip each day for now
+        self.scheduler.push(time, Event::HumanEnteredStation { hid, sid, dsid, lid, trid});
     }
 
     pub fn do_step(&mut self, cur_time: Time) -> Vec<String> {
@@ -94,6 +103,7 @@ impl<'a> SimEngine<'a> {
                     self.train_manager.putWaitingHuman(hid, sid, dsid, lid, cur_time, trid);
 
                     // SQL: create a trip node, create trip - prevTrip, trip - start, trip - end relationship
+                    // this could be done in the spawn human method
                 }
                 Event::HumanBoardTrain {hid, lid, sid, tid, trid} => {
                     // SQL: HumanBoardTrain Node

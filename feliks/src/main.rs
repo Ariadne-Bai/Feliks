@@ -38,14 +38,14 @@ async fn execute(qs: &String, g: &Arc<Graph>) {
 async fn main() {
     println!("Hello, world!");
 
-    let neoflag = true;
+    let neoflag = false;
 
     let g = createNeo().await;
 
     let mut sch = Scheduler::new();
     let mut trmanager = TrainManager::new();
-    let mut simengine = SimEngine::new(&mut sch, &mut trmanager);
     let mut humanager = HumanManager::new();
+    let mut simengine = SimEngine::new(&mut sch, &mut trmanager, humanager);
 
     let mut qs_stations = Vec::new();
     let appId = simengine
@@ -194,9 +194,11 @@ async fn main() {
         }
 
         let trip = simengine.train_manager.randomTrip();
-        let human = humanager.register_human(trip);
+        let plan = *trip.first().unwrap();
+        let human = simengine.human_manager.register_human(trip);
         
-        simengine.spawn_human(&humanager.humans.get(&human.0).unwrap().plan, human.0, human.2);
+        // let btrip = &simengine.human_manager.humans.get(&human.0).unwrap().plan;
+        simengine.spawn_human(plan, human.0, human.2);
         qs_human.push(human.1.0);
         qs_human.push(human.1.1);
         qs_human.push(human.1.2);

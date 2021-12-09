@@ -55,4 +55,16 @@ use std::collections::HashMap;
          );
          (self.next_human - 1, (qs, qst, qstt), self.next_trip - 1)
      }
+
+     pub fn new_trip(&mut self, hid: HumanID) -> TripID {
+         // let last_trip = self.trip_logs.get(&hid)
+         self.trip_logs.get_mut(&hid).unwrap().push(self.next_trip);
+         self.next_trip += 1;
+
+         self.next_trip - 1
+     }
+
+     pub fn find_prev_trip(&self, hid: HumanID) -> TripID {
+         unimplemented!();
+     }
  }

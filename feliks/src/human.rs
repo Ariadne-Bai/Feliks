@@ -21,7 +21,7 @@ impl Human {
 }
 
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Copy)]
 pub struct TripUnit {
     pub line: LineID,
     pub on: StationID,
