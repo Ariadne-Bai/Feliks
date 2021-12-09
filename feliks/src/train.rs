@@ -10,8 +10,8 @@ pub struct Train {
     // train run at the same speed as long as it start, no acceleration consitered
     pub speed: u32,
     state: TrainState,
-    // (humanId, start, destination, line, since time)
-    pub passengers_queue: VecDeque<(HumanID, StationID, StationID, LineID, Time)>,
+    // (humanId, start, destination, line, since time, trip)
+    pub passengers_queue: VecDeque<(HumanID, StationID, StationID, LineID, Time, TripID)>,
 }
 
 impl Train {
@@ -48,8 +48,8 @@ pub struct Station {
     name: String,
     corx: Distance,
     cory: Distance,
-    // hid, startStation, destStation, line, since time
-    pub wait_queue: VecDeque<(HumanID, StationID, StationID, LineID, Time)>,
+    // hid, startStation, destStation, line, since time, trip
+    pub wait_queue: VecDeque<(HumanID, StationID, StationID, LineID, Time, TripID)>,
 }
 
 impl Station {

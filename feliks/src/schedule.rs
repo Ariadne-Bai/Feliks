@@ -29,18 +29,21 @@ pub enum Event {
         sid: StationID,
         dsid: StationID,   // enter station with a destination station
         lid: LineID,     // human enter station with a purpose of taking a particular line
+        trid: TripID,
     },
     HumanBoardTrain {
         hid: HumanID,
         lid: LineID,
         sid: StationID,
         tid: TrainID,
+        trid: TripID,
     },
     HumanUnboardTrain {
         hid: HumanID,
         lid: LineID,
         sid: StationID,
         tid: TrainID,
+        trid: TripID,
     },
     HumanLeaveStation {
         hid: HumanID,
@@ -62,7 +65,7 @@ impl Scheduler {
     }
 
     pub fn push(&mut self, time: Time, event: Event) {
-        println!("pushed a new event {:?} for time {}", event, time);
+        // println!("pushed a new event {:?} for time {}", event, time);
         self.items.push(Item { time, event });
     }
 

@@ -38,13 +38,14 @@ async fn execute(qs: &String, g: &Arc<Graph>) {
 async fn main() {
     println!("Hello, world!");
 
-    let neoflag = false;
+    let neoflag = true;
 
     let g = createNeo().await;
 
     let mut sch = Scheduler::new();
     let mut trmanager = TrainManager::new();
     let mut simengine = SimEngine::new(&mut sch, &mut trmanager);
+    let mut humanager = HumanManager::new();
 
     let mut qs_stations = Vec::new();
     let appId = simengine
@@ -145,8 +146,24 @@ async fn main() {
     // train 0: (s0, Arr, 35), (s0, Dep, 40), (s1, Arr, 45), (s1, Dep, 51), (s2, Arr, 61), (s2, Dep, 68), (s3, Arr, 78), (s3, Dep, 86)
 
     // new train will start from Station Apple on Time 0 and Time 75;
-    let new_times = vec![10, 35];
-    let new_times_sweety = vec![20, 80];
+    let mut new_times = Vec::new();
+    let mut newt = 400;  // every 60 minutes
+    loop {
+        if (newt >= 1380) {
+            break;
+        }
+        new_times.push(newt);
+        newt += 60;
+    }
+    let mut new_times_sweety = Vec::new();
+    let mut new_sweett = 420;  // every 60 minutes
+    loop {
+        if (new_sweett >= 1380) {
+            break;
+        }
+        new_times_sweety.push(new_sweett);
+        new_sweett += 60;
+    }
 
     for time in new_times {
         simengine
@@ -168,9 +185,35 @@ async fn main() {
         simengine.spawn_train(time, sweetyId, choId.0, ntid);
     }
 
-    let mut clock = 0;
+    let mut qs_human = Vec::new();
+    // create human
+    let mut numHumans = 0;
     loop {
-        if clock >= 200 {
+        if numHumans >= 5 {
+            break;
+        }
+
+        let trip = simengine.train_manager.randomTrip();
+        let human = humanager.register_human(trip);
+        
+        simengine.spawn_human(&humanager.humans.get(&human.0).unwrap().plan, human.0, human.2);
+        qs_human.push(human.1.0);
+        qs_human.push(human.1.1);
+        qs_human.push(human.1.2);
+        numHumans += 1;
+    }
+    // add humans to neo
+    if neoflag {
+        for qs in qs_human {
+            println!("query string for new human {}", &qs);
+            execute(&qs, &g).await;
+        }
+    }
+
+
+    let mut clock = 360;
+    loop {
+        if clock >= 1440 {
             break;
         }
         let qss = simengine.do_step(clock);

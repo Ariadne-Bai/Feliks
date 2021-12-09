@@ -30,13 +30,13 @@ impl<'a> SimEngine<'a> {
             .push(time, Event::TrainArrival { lid, sid, tid });
     }
 
-    pub fn spawn_human(&mut self, plan: &Vec<TripUnit>, hid: HumanID) {
+    pub fn spawn_human(&mut self, plan: &Vec<TripUnit>, hid: HumanID, trid: TripID) {
         if let Some(trip) = plan.first() {
             let lid = trip.line;
             let sid = trip.on;
             let dsid = trip.off;
             let time = trip.start_time;
-            self.scheduler.push(time, Event::HumanEnteredStation { hid, sid, dsid, lid});
+            self.scheduler.push(time, Event::HumanEnteredStation { hid, sid, dsid, lid, trid});
             
         }
     }
@@ -47,7 +47,7 @@ impl<'a> SimEngine<'a> {
             self.count_sim += 1;
             match event {
                 Event::TrainArrival { lid, sid, tid } => {
-                    let res = self.train_manager.handle_event(event);
+                    let res = self.train_manager.handle_event(event, cur_time);
                     self.scheduler.push(cur_time + res.0, res.1.unwrap());
 
                     // schedule offload event. offload event happens after this event, to make sure the Arrival node already exist
@@ -66,7 +66,7 @@ impl<'a> SimEngine<'a> {
                     }
                 }
                 Event::TrainDeparture { lid, sid, tid } => {
-                    let res = self.train_manager.handle_event(event);
+                    let res = self.train_manager.handle_event(event, cur_time);
                     // only schedule new event if there is another station; otherwise do nothing
                     res.1.map(|event| {
                         self.scheduler.push(cur_time + res.0, event);
@@ -88,24 +88,24 @@ impl<'a> SimEngine<'a> {
                     // ignore this case for now
                     
                 }
-                Event::HumanEnteredStation {hid, sid, dsid, lid} => {
+                Event::HumanEnteredStation {hid, sid, dsid, lid, trid} => {
                     // push this human into the station waiting queue
                     // ignore reschedule for now
-                    self.train_manager.putWaitingHuman(hid, sid, dsid, lid, cur_time);
+                    self.train_manager.putWaitingHuman(hid, sid, dsid, lid, cur_time, trid);
 
                     // SQL: create a trip node, create trip - prevTrip, trip - start, trip - end relationship
                 }
-                Event::HumanBoardTrain {hid, lid, sid, tid} => {
+                Event::HumanBoardTrain {hid, lid, sid, tid, trid} => {
                     // SQL: HumanBoardTrain Node
                     // SQL: station - event relationship
                     // SQL: trip - event relationship
-                    println!("A HumanBoardTrain Event hid {} lid {} sid {} tid {}", hid, lid, sid, tid);
+                    println!("A HumanBoardTrain Event hid {} lid {} sid {} tid {} trid {}", hid, lid, sid, tid, trid);
                 }
-                Event::HumanUnboardTrain{hid, lid, sid,tid} => {
+                Event::HumanUnboardTrain{hid, lid, sid,tid, trid} => {
                     // SQL: HumanUnboardTrain Node
                     // SQL: station - unboard relationship 
                     // SQL: trip - event relationship
-                    println!("A HumanUnoardTrain Event hid {} lid {} sid {} tid {}", hid, lid, sid, tid);
+                    println!("A HumanUnoardTrain Event hid {} lid {} sid {} tid {} trid {}", hid, lid, sid, tid, trid);
                 }
                 Event::HumanLeaveStation{hid, sid} => {
                     

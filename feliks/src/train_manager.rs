@@ -131,7 +131,7 @@ impl<'a> TrainManager<'a> {
         self.lineTables.get(&lid).unwrap().get_last_station(sid)
     }
 
-    pub fn handle_event(&mut self, event: Event) -> (Time, Option<Event>, Vec<Event>) {
+    pub fn handle_event(&mut self, event: Event, cur_time: Time) -> (Time, Option<Event>, Vec<Event>) {
         let mut humanEvents = Vec::new();
         match event {
             Event::TrainArrival { lid, sid, tid } => {
@@ -151,7 +151,7 @@ impl<'a> TrainManager<'a> {
                     if hsf.2 == sid {
                         // TODO: this passenger needs to get off, generate HumanUnboardEvent, and possibly delay event
                         // ignore delay event for now
-                        humanEvents.push(Event::HumanUnboardTrain{hid: hsf.0, lid: hsf.3, sid: hsf.2, tid});
+                        humanEvents.push(Event::HumanUnboardTrain{hid: hsf.0, lid: hsf.3, sid: hsf.2, tid, trid: hsf.5});
                     } else {
                         // this passenger does not get off at this station
                         self.trains.get_mut(&tid).unwrap().passengers_queue.push_back(hsf);
@@ -190,7 +190,8 @@ impl<'a> TrainManager<'a> {
 
                                 // TODO: generate HumanBoardTrain Event; May generate HumanExtraWaitEvent
                                 // ignore wait event for now
-                                humanEvents.push(Event::HumanBoardTrain{hid: hsf.0, lid: hsf.3, sid: hsf.1, tid});
+                                humanEvents.push(Event::HumanBoardTrain{hid: hsf.0, lid: hsf.3, sid: hsf.1, tid, trid: hsf.5});
+                                // wait event: if "curr Time is larger than since time"
                             } else {
                                 // put this human back, not waiting for this trian
                                 self.stations.get_mut(&sid).unwrap().wait_queue.push_back(hsf);
@@ -208,13 +209,13 @@ impl<'a> TrainManager<'a> {
             Event::HumanArriveStation {hid, sid, lid} => {
                 (0, None, humanEvents)
             }
-            Event::HumanEnteredStation {hid, sid, dsid, lid} => {
+            Event::HumanEnteredStation {hid, sid, dsid, lid, trid} => {
                 (0, None, humanEvents)
             }
-            Event::HumanBoardTrain {hid, lid, sid, tid} => {
+            Event::HumanBoardTrain {hid, lid, sid, tid,trid} => {
                 (0, None, humanEvents)
             }
-            Event::HumanUnboardTrain{hid, lid, sid,tid} => {
+            Event::HumanUnboardTrain{hid, lid, sid,tid, trid} => {
                 (0, None, humanEvents)
             }
             Event::HumanLeaveStation{hid, sid} => {
@@ -234,7 +235,7 @@ impl<'a> TrainManager<'a> {
         let lineStart = rng.gen_range(0..numLines);   // rand 取左开右闭区间
 
         let stationsWeights = self.lineTables.get(&lineStart).unwrap().total_weight;
-        let startWeight = rng.gen_range(0..stationsWeights - 5);
+        let startWeight = rng.gen_range(0..stationsWeights - 3);
         let startStation = self.lineTables.get(&lineStart).unwrap().find_station_weight(startWeight);
         let endWeight = rng.gen_range(startWeight+3..stationsWeights);
         let endStation = self.lineTables.get(&lineStart).unwrap().find_station_weight(endWeight);
@@ -265,7 +266,7 @@ impl<'a> TrainManager<'a> {
         trip
     }
 
-    pub fn putWaitingHuman(&mut self, hid: HumanID, sid: StationID, dsid: StationID, lid: LineID, since: Time) {
-        self.stations.get_mut(&sid).unwrap().wait_queue.push_back((hid, sid, dsid, lid, since));
+    pub fn putWaitingHuman(&mut self, hid: HumanID, sid: StationID, dsid: StationID, lid: LineID, since: Time, trid: TripID) {
+        self.stations.get_mut(&sid).unwrap().wait_queue.push_back((hid, sid, dsid, lid, since, trid));
     }
 }
