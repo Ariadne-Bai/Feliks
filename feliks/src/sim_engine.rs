@@ -152,6 +152,21 @@ impl<'a> SimEngine<'a> {
                 Event::HumanLeaveStation{hid, sid} => {
                     
                 }
+                Event::HumanWait{hid, lid, sid, trid, waitTime} => {
+                    let qs_wait = format!(
+                        "CREATE (v:HumanWait:Event {{ humanID: {}, lineID:{}, stationID:{}, tripID:{}, waitTime:{}}})", hid, lid, sid, trid, waitTime
+                    );
+                
+                    resqs.push(qs_wait);
+                    let qs_trip = format!(
+                        "MATCH (v:HumanWait), (tr:TripLog) WHERE v.tripID = {} AND tr.tripID = {} CREATE (tr)-[:HAS_WAIT]->(v)", trid, trid
+                    );
+                    resqs.push(qs_trip);
+                    let qs_station = format!(
+                        "MATCH (v:HumanWait), (st:Station) WHERE v.stationID = {} AND v.tripID = {} AND st.stationID = {} CREATE (v)-[:WAIT_AT]->(st)", sid, trid, sid
+                    );
+                    resqs.push(qs_station);
+                }
             }
         }
         // the loop should break when there is no more event at this time point

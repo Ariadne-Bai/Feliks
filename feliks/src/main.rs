@@ -147,22 +147,22 @@ async fn main() {
 
     // new train will start from Station Apple on Time 0 and Time 75;
     let mut new_times = Vec::new();
-    let mut newt = 400;  // every 60 minutes
+    let mut newt = 400;  // every 30 minutes
     loop {
         if (newt >= 1380) {
             break;
         }
         new_times.push(newt);
-        newt += 60;
+        newt += 30;
     }
     let mut new_times_sweety = Vec::new();
-    let mut new_sweett = 420;  // every 60 minutes
+    let mut new_sweett = 420;  // every 30 minutes
     loop {
         if (new_sweett >= 1380) {
             break;
         }
         new_times_sweety.push(new_sweett);
-        new_sweett += 60;
+        new_sweett += 30;
     }
 
     for time in new_times {
@@ -189,7 +189,7 @@ async fn main() {
     // create human
     let mut numHumans = 0;
     loop {
-        if numHumans >= 15 {
+        if numHumans >= 300 {
             break;
         }
 

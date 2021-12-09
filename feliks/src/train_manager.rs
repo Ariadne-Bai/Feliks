@@ -192,6 +192,10 @@ impl<'a> TrainManager<'a> {
                                 // ignore wait event for now
                                 humanEvents.push(Event::HumanBoardTrain{hid: hsf.0, lid: hsf.3, sid: hsf.1, tid, trid: hsf.5});
                                 // wait event: if "curr Time is larger than since time"
+                                if cur_time - hsf.4 > 12 {
+                                    // humanEvents.push(Event::HumanWait{hid: })
+                                    humanEvents.push(Event::HumanWait{hid: hsf.0, lid: hsf.3, sid: hsf.1, trid: hsf.5, waitTime: cur_time - hsf.4});
+                                }
                             } else {
                                 // put this human back, not waiting for this trian
                                 self.stations.get_mut(&sid).unwrap().wait_queue.push_back(hsf);
@@ -219,6 +223,9 @@ impl<'a> TrainManager<'a> {
                 (0, None, humanEvents)
             }
             Event::HumanLeaveStation{hid, sid} => {
+                (0, None, humanEvents)
+            }
+            Event::HumanWait{hid, lid, sid, trid, waitTime} => {
                 (0, None, humanEvents)
             }
         }

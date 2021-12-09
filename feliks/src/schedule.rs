@@ -48,6 +48,13 @@ pub enum Event {
     HumanLeaveStation {
         hid: HumanID,
         sid: StationID,   // not sure any more variants needed here
+    },
+    HumanWait {
+        hid: HumanID,
+        lid: LineID, 
+        sid: StationID,
+        trid: TripID,
+        waitTime: Time,
     }
 }
 
