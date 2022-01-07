@@ -162,7 +162,7 @@ async fn main() {
             break;
         }
         new_times_sweety.push(new_sweett);
-        new_sweett += 30;
+        new_sweett += 60;
     }
 
     for time in new_times {
